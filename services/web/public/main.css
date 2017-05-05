@@ -1,0 +1,24 @@
+body {
+  text-align: center
+}
+
+.panel {
+  height: 455px;
+  overflow: hidden;
+}
+.panel-body img {
+  max-width: 90%;
+  width: auto;
+  height: 90%;
+  max-height: 330px;
+}
+
+.search-bar {
+  margin: 40px auto;
+  max-width: 40%;
+}
+
+.search-bar input {
+  width: 50%;
+  margin: auto;
+}
