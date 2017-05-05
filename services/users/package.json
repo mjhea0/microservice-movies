@@ -1,0 +1,32 @@
+{
+  "scripts": {
+    "start": "gulp --gulpfile gulpfile.js",
+    "test": "./node_modules/mocha/bin/_mocha 'tests/**/*.test.js'"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.3.0",
+    "body-parser": "~1.17.1",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.6",
+    "dotenv": "~4.0.0",
+    "express": "~4.15.2",
+    "jwt-simple": "^0.5.0",
+    "knex": "0.13.0",
+    "moment": "^2.15.2",
+    "morgan": "~1.8.1",
+    "pg": "^6.1.4",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "eslint": "^3.18.0",
+    "eslint-config-airbnb-base": "^11.1.1",
+    "eslint-plugin-import": "^2.2.0",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^3.0.1",
+    "gulp-nodemon": "^2.2.1",
+    "mocha": "^3.2.0"
+  }
+}

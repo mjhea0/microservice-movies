@@ -1,0 +1,4 @@
+#!/bin/sh
+
+docker-compose run users-service knex migrate:latest --env development --knexfile knexfile.js
+docker-compose run users-service knex seed:run --env development --knexfile knexfile.js
