@@ -1,10 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const SavedMovies = (props) => {
+
   return (
     <div>
       <br/><br/>
-      <table className="table table-hover">
+      <div className="text-center"><Link to='/'>Home</Link></div>
+      <table className='table table-hover'>
         <thead>
           <tr>
             <th>ID</th>
@@ -15,12 +18,12 @@ const SavedMovies = (props) => {
         </thead>
         <tbody>
           {
-            props.savedMovies.map((movies) => {
+            props.saved.map((movie) => {
               return (
                 <tr key={movie.id}>
                   <td>{ movie.id }</td>
                   <td>{ movie.title }</td>
-                  <td>{ movie.date }</td>
+                  <td>{ movie.created_at }</td>
                 </tr>
               )
             })

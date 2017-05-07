@@ -1,11 +1,12 @@
-body {
-  text-align: center
+.error-text {
+  color: red;
 }
 
 .panel {
   height: 455px;
   overflow: hidden;
 }
+
 .panel-body img {
   max-width: 90%;
   width: auto;

@@ -2,13 +2,14 @@
   "dependencies": {
     "axios": "^0.15.3",
     "react": "^15.4.4",
-    "react-dom": "^15.4.4"
+    "react-dom": "^15.4.4",
+    "react-router-dom": "^4.1.1"
   },
   "devDependencies": {
     "react-scripts": "0.9.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=3006 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"

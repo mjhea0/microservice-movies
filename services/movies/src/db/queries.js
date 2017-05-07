@@ -10,5 +10,5 @@ function addMovie(obj) {
 
 module.exports = {
   getSavedMovies,
-  addMovie
+  addMovie,
 };

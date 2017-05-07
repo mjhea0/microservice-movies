@@ -1,5 +1,7 @@
 const express = require('express');
+
 const queries = require('../db/queries.js');
+const routeHelpers = require('./_helpers');
 
 const router = express.Router();
 
@@ -11,7 +13,7 @@ router.get('/ping', (req, res) => {
 get movies by user
  */
 /* eslint-disable no-param-reassign */
-router.get('/user', (req, res, next) => {
+router.get('/user', routeHelpers.ensureAuthenticated, (req, res, next) => {
   return queries.getSavedMovies(parseInt(req.user, 10))
   .then((movies) => {
     res.json({
@@ -26,13 +28,13 @@ router.get('/user', (req, res, next) => {
 /*
 add new movie
  */
-router.post('/', (req, res, next) => {
+router.post('/', routeHelpers.ensureAuthenticated, (req, res, next) => {
   req.body.user_id = req.user;
   return queries.addMovie(req.body)
   .then(() => {
     res.json({
       status: 'success',
-      data: 'Location Added!',
+      data: 'Movie Added!',
     });
   })
   .catch((err) => { return next(err); });

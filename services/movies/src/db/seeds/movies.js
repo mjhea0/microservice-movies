@@ -8,5 +8,5 @@ exports.seed = (knex, Promise) => {
       })  // eslint-disable-line
     );
   })
-  .catch((err) => { console.log(err); });
+  .catch((err) => { console.log(err); }); // eslint-disable-line
 };
