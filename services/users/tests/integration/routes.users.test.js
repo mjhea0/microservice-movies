@@ -25,8 +25,8 @@ describe('routes : users', () => {
       chai.request(server)
       .post('/users/register')
       .send({
-        username: 'michael',
-        password: 'herman'
+        username: 'john',
+        password: 'doe'
       })
       .end((err, res) => {
         should.not.exist(err);
@@ -45,8 +45,8 @@ describe('routes : users', () => {
       chai.request(server)
       .post('/users/login')
       .send({
-        username: 'jeremy',
-        password: 'johnson123'
+        username: 'michael',
+        password: 'herman'
       })
       .end((err, res) => {
         should.not.exist(err);
@@ -63,8 +63,8 @@ describe('routes : users', () => {
       chai.request(server)
       .post('/users/login')
       .send({
-        username: 'michael',
-        password: 'johnson123'
+        username: 'not',
+        password: 'valid'
       })
       .end((err, res) => {
         should.exist(err);
@@ -78,7 +78,7 @@ describe('routes : users', () => {
       chai.request(server)
       .post('/users/login')
       .send({
-        username: 'jeremy',
+        username: 'michael',
         password: 'incorrect'
       })
       .end((err, res) => {
@@ -96,8 +96,8 @@ describe('routes : users', () => {
       chai.request(server)
       .post('/users/login')
       .send({
-        username: 'jeremy',
-        password: 'johnson123'
+        username: 'michael',
+        password: 'herman'
       })
       .end((error, response) => {
         should.not.exist(error);
