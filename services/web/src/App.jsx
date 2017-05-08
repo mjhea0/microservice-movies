@@ -181,7 +181,7 @@ class App extends Component {
               createFlashMessage={this.createFlashMessage}
               loginUser={this.loginUser} />
           )} />
-        <Route path='/collection' render={() => (
+          <Route path='/collection' render={() => (
             isAuthenticated
             ? <SavedMovies
               createFlashMessage={this.createFlashMessage}
