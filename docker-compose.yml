@@ -83,10 +83,3 @@ services:
     links:
       - users-service
       - movies-service
-
-  tests:
-    container_name: tests
-    build: ./tests/
-    volumes:
-      - './tests:/tests'
-      - './services/web/package.json:/src/package.json'
