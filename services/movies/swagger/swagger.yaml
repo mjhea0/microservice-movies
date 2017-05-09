@@ -1,0 +1,21 @@
+---
+swagger: "2.0"
+info:
+  description: "Just a simple example"
+  version: "1.0.0"
+  title: "Movies API"
+host: "localhost:3001"
+basePath: "/movies"
+schemes:
+  - "http"
+produces:
+  - "text/html"
+  - "application/json"
+paths:
+  /ping:
+    get:
+      summary: Performs a sanity check
+      description: Just a test
+      responses:
+        200:
+          description: just a sanity check
