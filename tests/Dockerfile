@@ -1,1 +1,0 @@
-FROM testcafe/testcafe:latest
