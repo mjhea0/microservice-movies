@@ -1,11 +1,11 @@
 # Microservice Movies
 
-| Name             | Service | Container | Tech          |
-|------------------|---------|-----------|---------------|
-| Web              | Web     | web       | React, Redux  |
-| Movie API        | Movie   | movie     | Node, Express |
-| Movie DB         | Movie   | movie-db  | Postgres      |
-| Swagger          | Movie   | swagger   | Swagger UI    |
-| User API         | User    | user      | Node, Express |
-| User DB          | User    | user-db   | Postgres      |
-| Functional Tests | Test    | test      | TestCafe      |
+| Name             | Service | Container | Tech                 |
+|------------------|---------|-----------|----------------------|
+| Web              | Web     | web       | React, React-Router  |
+| Movies API       | Movies  | movies    | Node, Express        |
+| Movies DB        | Movies  | movies-db | Postgres             |
+| Swagger          | Movies  | swagger   | Swagger UI           |
+| Users API        | Users   | users     | Node, Express        |
+| Users DB         | Users   | users-db  | Postgres             |
+| Functional Tests | Test    | n/a       | TestCafe             |
