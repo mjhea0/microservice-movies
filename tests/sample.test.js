@@ -1,12 +1,25 @@
 import { Selector } from 'testcafe';
 
-fixture('Getting Started').page('https://github.com');
+fixture('/login').page('http://localhost:3007');
 
-test('Find "testcafe-example" repo on GitHub', async (t) => {
-  const repo = Selector('.repo-list > li > div');
+test(`users should be able to log in and out`, async (t) => {
+
+  // selectors
+  const loginMessage = Selector('div').withText(
+    'You successfully logged in! Welcome!')
+  const logoutMessage = Selector('div').withText('You are now logged out')
+
+  // login
   await t
-    .typeText('form[action="/search"]', 'testcafe-example user:mjhea0')
-    .pressKey('enter');
+    .navigateTo('http://localhost:3007')
+    .typeText('input[name="username"]', 'michael')
+    .typeText('input[name="password"]', 'herman')
+    .click(Selector('button[type="submit"]'));
+
+  // logout
   await t
-    .expect(repo.innerText).contains('mjhea0/testcafe-example');
+    .expect(loginMessage.exists).ok()
+    .click(Selector('a').withText('Logout'))
+    .expect(logoutMessage.exists).ok()
+
 });

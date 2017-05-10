@@ -117,13 +117,8 @@ class App extends Component {
       }
     };
     return axios(options)
-    .then((res) => {
-      console.log(res);
-      this.getMovies()
-    })
-    .catch((error) => {
-      console.log(error);
-    })
+    .then((res) => { this.getMovies() })
+    .catch((error) => { console.log(error); })
   }
   getMovies() {
     const options = {
