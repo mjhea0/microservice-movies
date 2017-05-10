@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "start": "gulp --gulpfile app/gulpfile.js",
-    "test": "./node_modules/mocha/bin/_mocha 'app/tests/**/*.test.js'"
+    "start": "gulp --gulpfile gulpfile.js",
+    "test": "./node_modules/mocha/bin/_mocha 'tests/**/*.test.js'"
   },
   "dependencies": {
     "body-parser": "^1.17.1",
