@@ -83,3 +83,22 @@ services:
     links:
       - users-service
       - movies-service
+
+  swagger:
+    container_name: swagger
+    build: ./services/movies/swagger/
+    volumes:
+      - './services/movies/swagger:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    ports:
+      - '3003:3001' # expose ports - HOST:CONTAINER
+    environment:
+      - NODE_ENV=${NODE_ENV}
+    depends_on:
+      users-service:
+        condition: service_started
+      movies-service:
+        condition: service_started
+    links:
+      - users-service
+      - movies-service
