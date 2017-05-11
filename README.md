@@ -1,6 +1,6 @@
 # Developing Microservices - Node, React, and Docker
 
-[![Build Status](https://travis-ci.org/mjhea0/node-docker-api.svg?branch=master)](https://travis-ci.org/mjhea0/node-docker-api)
+[![Build Status](https://travis-ci.org/mjhea0/microservice-movies.svg?branch=master)](https://travis-ci.org/mjhea0/microservice-movies)
 
 http://mherman.org/microservice-movies/
 
