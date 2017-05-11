@@ -1,4 +1,15 @@
+language: node_js
+node_js: "7"
+
+dist: trusty
 sudo: required
+
+addons:
+  apt:
+    sources:
+     - google-chrome
+    packages:
+     - google-chrome-stable
 
 services:
   - docker
@@ -13,7 +24,11 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
 
 before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3
   - export NODE_ENV=test
+  - docker-compose up --build -d
   - sh init_db.sh
   - npm install testcafe -g
 
