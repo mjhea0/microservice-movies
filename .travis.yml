@@ -13,8 +13,9 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
 
 before_script:
+  - export NODE_ENV=test
   - sh init_db.sh
-  - npm install testcafe
+  - npm install testcafe -g
 
 script:
   - sh test.sh
