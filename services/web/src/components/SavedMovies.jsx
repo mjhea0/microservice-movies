@@ -5,8 +5,10 @@ const SavedMovies = (props) => {
 
   return (
     <div>
+      <h1>Collection</h1>
+      <hr/>
+      <div><Link to='/'>Home</Link></div>
       <br/><br/>
-      <div className="text-center"><Link to='/'>Home</Link></div>
       <table className='table table-hover'>
         <thead>
           <tr>
