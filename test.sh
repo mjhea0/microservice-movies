@@ -17,7 +17,7 @@ inspect $? movies-service
 testcafe firefox tests/**/*.js
 inspect $? e2e
 
-if [[ -n "${fails}" ]];
+if [ -n "${fails}" ];
   then
     echo "Tests failed: ${fails}"
     exit 1
