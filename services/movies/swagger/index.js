@@ -5,7 +5,7 @@ const jsyaml = require('js-yaml');
 const fs = require('fs');
 
 const serverPort = 3001;
-const options = { swaggerUi: '/swagger.json' };
+const options = {};
 
 const spec = fs.readFileSync('./swagger.yaml', 'utf8');
 const swaggerDoc = jsyaml.safeLoad(spec);

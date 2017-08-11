@@ -163,7 +163,7 @@ The end goal of this post is to organize the technologies from the above image i
 
 - Complexity shifts from the inside (code, vertical stack) to the outside (platform, horizontal stack), managing each dependency, which *can* be good if you have a younger team in terms of developers. Junior developers are free to experiment and muck up smaller apps. You must have solid dev ops support though.
 
-  <img src="images/microservices.png" style="max-width: 25%; border:0; box-shadow: none;" alt="microservice">
+  <img src="images/microservices.png" style="max-width: 20%; border:0; box-shadow: none;" alt="microservice">
 
 
 --
@@ -176,7 +176,11 @@ The end goal of this post is to organize the technologies from the above image i
 
 --
 
-- Smaller code base, less coupled, solid API design, not having to understand the full system = easier to read code
+- Smaller code base, less coupled, force solid API design, not having to understand the full system = easier to read code
+
+--
+
+- **WARNING: They are hard!**
 
 ---
 
@@ -216,7 +220,7 @@ Docker 101: http://mherman.org/docker-workshop
 
 1. Review *[Dockerfile](https://github.com/mjhea0/microservice-movies/blob/master/services/users/src/db/Dockerfile)* and *[docker-compose.yml](https://github.com/mjhea0/microservice-movies/blob/master/docker-compose.yml)*
 1. Build image, run container: `docker-compose up -d --build users-db`
-1. Test/Sanity Check: `docker exec -ti users-db psql -U postgres -W`
+1. Test/Sanity Check: `docker exec -ti users-db psql -U postgres -W` and `docker-compose run users-db bash`
 
 ---
 
@@ -234,11 +238,14 @@ Docker 101: http://mherman.org/docker-workshop
 1. Test/Sanity Check:
     ```sh
     # create and seed the db
-    $ docker-compose run users-service knex migrate:latest --env development --knexfile app/knexfile.js
-    $ docker-compose run users-service knex seed:run --env development --knexfile app/knexfile.js
+    $ docker-compose run users-service knex migrate:latest \
+      --env development --knexfile app/knexfile.js
+    $ docker-compose run users-service knex seed:run \
+      --env development --knexfile app/knexfile.js
     # run unit and integration tests
     $ docker-compose run users-service npm test
     ```
+1. http://localhost:3000/users/ping
 
 ---
 
@@ -254,7 +261,7 @@ Docker 101: http://mherman.org/docker-workshop
 
 1. Review *[Dockerfile](https://github.com/mjhea0/microservice-movies/blob/master/services/movies/src/db/Dockerfile)* and *[docker-compose.yml](https://github.com/mjhea0/microservice-movies/blob/master/docker-compose.yml)*
 1. Build image, run container: `docker-compose up -d --build movies-db`
-1. Test/Sanity Check: `docker exec -ti movies-db psql -U postgres -W`
+1. Test/Sanity Check: `docker exec -ti movies-db psql -U postgres -W` and `docker-compose run movies-db bash`
 
 ---
 
@@ -272,11 +279,14 @@ Docker 101: http://mherman.org/docker-workshop
 1. Test/Sanity Check:
     ```sh
     # create and seed the db
-    $ docker-compose run movies-service knex migrate:latest --env development --knexfile app/knexfile.js
-    $ docker-compose run movies-service knex seed:run --env development --knexfile app/knexfile.js
+    $ docker-compose run movies-service knex migrate:latest \
+      --env development --knexfile app/knexfile.js
+    $ docker-compose run movies-service knex seed:run \
+      --env development --knexfile app/knexfile.js
     # run unit and integration tests
     $ docker-compose run movies-service npm test
     ```
+1. http://localhost:3001/movies/ping
 
 ---
 
@@ -301,17 +311,24 @@ Docker 101: http://mherman.org/docker-workshop
 
 ### Workflow
 
-1. Live reload
-1. Debugging
-1. Linting
-1. Docker logs
+--
+
+#### Movies Service
+
+1. Docker logs - `docker-compose logs -f [container-name]`
+1. Live reload - make a change, watch it update!
+
+--
+
+#### Web Service
+
+1. Live reload - Although live reload *probably* works with this version of Create React App, it is recommended to develop outside of the container.
 
 <br>
 
 <div style="text-align:left;">
-  <img src="images/docker-logo.png" style="max-width: 30%; border:0; box-shadow: none;" alt="docker logo">
+  <img src="images/docker-logo.png" style="max-width: 15%; border:0; box-shadow: none;" alt="docker logo">
 </div>
-
 
 ---
 
@@ -345,7 +362,7 @@ Docker 101: http://mherman.org/docker-workshop
 1. Quick [code](https://github.com/mjhea0/microservice-movies/tree/master/services/movies/swagger) review
 1. Review *[Dockerfile](https://github.com/mjhea0/microservice-movies/blob/master/services/movies/swagger/Dockerfile)* and *[docker-compose.yml](https://github.com/mjhea0/microservice-movies/blob/master/docker-compose.yml)*
 1. Build image, run container: `docker-compose up -d --build swagger`
-1. Test/Sanity Check: navigate to [http://localhost:3003](http://localhost:3003)
+1. Test/Sanity Check: navigate to [http://localhost:3003/docs/](http://localhost:3003/docs/)
 
 ---
 
