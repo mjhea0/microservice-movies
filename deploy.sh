@@ -106,4 +106,3 @@ configure_aws_cli
 get_cluster
 tag_and_push_images
 create_task_defs
-register_definition
