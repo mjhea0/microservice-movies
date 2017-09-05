@@ -72,6 +72,8 @@ services:
       - '3007:9000' # expose ports - HOST:CONTAINER
     environment:
       - NODE_ENV=${NODE_ENV}
+      - REACT_APP_USERS_SERVICE_URL=${REACT_APP_USERS_SERVICE_URL}
+      - REACT_APP_MOVIES_SERVICE_URL=h${REACT_APP_MOVIES_SERVICE_URL}
     depends_on:
       users-service-review:
         condition: service_started

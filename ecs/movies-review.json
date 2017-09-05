@@ -1,0 +1,102 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "movies-service-review",
+      "image": "%s.dkr.ecr.%s.amazonaws.com\/sample\/movies-service-review:review",
+      "essential": true,
+      "memoryReservation": 300,
+      "cpu": 300,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 0,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "DATABASE_URL",
+          "value": "postgres://postgres:postgres@movies-db-review:5432/movies_dev"
+        },
+        {
+          "name": "DATABASE_TEST_URL",
+          "value": "postgres://postgres:postgres@movies-db-review:5432/movies_test"
+        },
+        {
+          "name": "NODE_ENV",
+          "value": "test"
+        },
+        {
+          "name": "TOKEN_SECRET",
+          "value": "changeme"
+        }
+      ],
+      "links": [
+        "movies-db-review"
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "sample",
+          "awslogs-region": "%s"
+        }
+      }
+    },
+    {
+      "name": "movies-db-review",
+      "image": "%s.dkr.ecr.%s.amazonaws.com\/sample\/movies-db-review:review",
+      "essential": true,
+      "memoryReservation": 300,
+      "cpu": 300,
+      "portMappings": [
+        {
+          "containerPort": 5432
+        }
+      ],
+      "environment": [
+        {
+          "name": "POSTGRES_USER",
+          "value": "postgres"
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "value": "postgres"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "sample",
+          "awslogs-region": "%s"
+        }
+      }
+    },
+    {
+      "name": "swagger-review",
+      "image": "%s.dkr.ecr.%s.amazonaws.com\/sample\/swagger-review:review",
+      "essential": true,
+      "memoryReservation": 300,
+      "cpu": 300,
+      "portMappings": [
+        {
+          "containerPort": 3001,
+          "hostPort": 0,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "test"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "sample",
+          "awslogs-region": "%s"
+        }
+      }
+    }
+  ]
+}
