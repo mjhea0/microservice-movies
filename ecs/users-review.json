@@ -44,7 +44,7 @@
     },
     {
       "name": "users-db-review",
-      "image": "%s.dkr.ecr.%s.amazonaws.com\/users-db-review:review",
+      "image": "%s.dkr.ecr.%s.amazonaws.com\/sample\/users-db-review:review",
       "essential": true,
       "memoryReservation": 300,
       "cpu": 300,

@@ -17,6 +17,8 @@ LOAD_BALANCER_LISTENER_ARN="arn:aws:elasticloadbalancing:us-east-1:046505967931:
 NAMESPACE="sample"
 IMAGE_BASE="microservicemovies"
 ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${ECS_REGION}.amazonaws.com"
+SHORT_GIT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
+ECS_SERVICE=$SHORT_GIT_HASH
 
 
 # helpers
@@ -69,6 +71,7 @@ create_task_defs() {
   echo "$task_def"
   echo "Users task definition created!"
   register_definition
+	create_service "users"
   # movies
 	echo "Creating movies task definition..."
   family="sample-movies-review-td"
@@ -78,6 +81,7 @@ create_task_defs() {
   echo "$task_def"
   echo "Movies task definition created!"
   register_definition
+	create_service "movies"
   # web
 	echo "Creating web task definition..."
   family="sample-web-review-td"
@@ -87,6 +91,7 @@ create_task_defs() {
   echo "$task_def"
   echo "Web task definition created!"
   register_definition
+	create_service "web"
 }
 
 register_definition() {
@@ -99,6 +104,17 @@ register_definition() {
     return 1
   fi
 }
+
+create_service() {
+	echo "Creating service..."
+  if [[ $(aws ecs create-service --cluster $ECS_CLUSTER --service-name "$ECS_SERVICE-$1" --task-definition $revision --desired-count 1 | $JQ ".service.taskDefinition") == $revision ]]; then
+		echo "Service created!"
+	else
+		echo "Error creating service."
+		return 1
+  fi
+}
+
 
 # main
 
