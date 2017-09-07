@@ -87,7 +87,7 @@ create_task_defs() {
   echo "Movies task definition created!"
   register_definition
 	create_service "movies"
-	create_target_group "users" "/movies/ping"
+	create_target_group "movies" "/movies/ping"
 	get_target_group_arn "movies"
 	get_listener_priority
 	create_listener
