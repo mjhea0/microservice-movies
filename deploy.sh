@@ -19,6 +19,7 @@ IMAGE_BASE="microservicemovies"
 ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${ECS_REGION}.amazonaws.com"
 SHORT_GIT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
 ECS_SERVICE=$SHORT_GIT_HASH
+TARGET_GROUP=$SHORT_GIT_HASH
 
 
 # helpers
@@ -72,6 +73,10 @@ create_task_defs() {
   echo "Users task definition created!"
   register_definition
 	create_service "users"
+	create_target_group "users" "/users/ping"
+	get_target_group_arn "users"
+	get_listener_priority
+	create_listener
   # movies
 	echo "Creating movies task definition..."
   family="sample-movies-review-td"
@@ -82,6 +87,10 @@ create_task_defs() {
   echo "Movies task definition created!"
   register_definition
 	create_service "movies"
+	create_target_group "users" "/movies/ping"
+	get_target_group_arn "movies"
+	get_listener_priority
+	create_listener
   # web
 	echo "Creating web task definition..."
   family="sample-web-review-td"
@@ -92,6 +101,10 @@ create_task_defs() {
   echo "Web task definition created!"
   register_definition
 	create_service "web"
+	create_target_group "web" "/"
+	get_target_group_arn "web"
+	get_listener_priority
+	create_listener
 }
 
 register_definition() {
@@ -111,6 +124,47 @@ create_service() {
 		echo "Service created!"
 	else
 		echo "Error creating service."
+		return 1
+  fi
+}
+
+create_target_group() {
+	echo "Creating target group..."
+	if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port 80 --vpc-id $VPC_ID --health-check-path $2 | $JQ ".TargetGroups[0].TargetGroupName") == $TARGET_GROUP ]]; then
+		echo "Target group created - $TARGET_GROUP!"
+	else
+		echo "Error creating target group."
+		return 1
+  fi
+}
+
+get_target_group_arn() {
+	echo "Getting target group arn..."
+  if target_group_arn=$(aws elbv2 describe-target-groups --name "$TARGET_GROUP-$1" | $JQ ".TargetGroups[0].TargetGroupArn"); then
+    echo "Target group arn: $target_group_arn"
+  else
+    echo "Failed to get target group arn."
+    return 1
+  fi
+}
+
+get_listener_priority() {
+	echo "Getting listener priority..."
+  if length=$(aws elbv2 describe-rules --listener-arn $LOAD_BALANCER_LISTENER_ARN | $JQ  ".Rules | length"); then
+		length=$(($length+1))
+    echo "Listener priority: $length"
+  else
+    echo "Failed to get target group arn."
+    return 1
+  fi
+}
+
+create_listener() {
+	echo "Creating listener..."
+	if [[ $(aws elbv2 create-rule --listener-arn $LOAD_BALANCER_LISTENER_ARN --priority $length --conditions Field=path-pattern,Values="/${SHORT_GIT_HASH}" --actions Type=forward,TargetGroupArn=$target_group_arn | $JQ ".Rules[0].Actions[0].TargetGroupArn") == $target_group_arn ]]; then
+		echo "Listener created!"
+	else
+		echo "Error creating listener."
 		return 1
   fi
 }
