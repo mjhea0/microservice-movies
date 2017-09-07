@@ -18,7 +18,6 @@ NAMESPACE="sample"
 IMAGE_BASE="microservicemovies"
 ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${ECS_REGION}.amazonaws.com"
 SHORT_GIT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
-ECS_SERVICE=$SHORT_GIT_HASH
 TARGET_GROUP=$SHORT_GIT_HASH
 
 
@@ -67,44 +66,29 @@ create_task_defs() {
 	echo "Creating users task definition..."
   family="sample-users-review-td"
   template="users-review.json"
-  task_template=$(cat "ecs/tasks/$template")
+  task_template=$(cat "ecs/$template")
   task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
   echo "$task_def"
   echo "Users task definition created!"
   register_definition
-	# create_service "users"
-	# create_target_group "users" "3000" "/users/ping"
-	# get_target_group_arn "users"
-	# get_listener_priority
-	# create_listener
   # movies
 	echo "Creating movies task definition..."
   family="sample-movies-review-td"
   template="movies-review.json"
-  task_template=$(cat "ecs/tasks/$template")
+  task_template=$(cat "ecs/$template")
   task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
   echo "$task_def"
   echo "Movies task definition created!"
   register_definition
-	# create_service "movies"
-	# create_target_group "movies" "3000" "/movies/ping"
-	# get_target_group_arn "movies"
-	# get_listener_priority
-	# create_listener
   # web
 	echo "Creating web task definition..."
   family="sample-web-review-td"
   template="web-review.json"
-  task_template=$(cat "ecs/tasks/$template")
+  task_template=$(cat "ecs/$template")
   task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
   echo "$task_def"
   echo "Web task definition created!"
   register_definition
-	# create_service "web"
-	# create_target_group "web" "9000" "/"
-	# get_target_group_arn "web"
-	# get_listener_priority
-	# create_listener
 }
 
 register_definition() {
@@ -118,56 +102,25 @@ register_definition() {
   fi
 }
 
-# create_service() {
-# 	echo "Creating service..."
-#   if [[ $(aws ecs create-service --cluster $ECS_CLUSTER --service-name "$ECS_SERVICE-$1" --task-definition $revision --desired-count 1 | $JQ ".service.taskDefinition") == $revision ]]; then
-# 		echo "Service created!"
-# 	else
-# 		echo "Error creating service."
-# 		return 1
-#   fi
-# }
-#
-# create_target_group() {
-# 	echo "Creating target group..."
-# 	if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port $2 --vpc-id $VPC_ID --health-check-path $3 | $JQ ".TargetGroups[0].TargetGroupName") == "$TARGET_GROUP-$1" ]]; then
-# 		echo "Target group created!"
-# 	else
-# 		echo "Error creating target group."
-# 		return 1
-#   fi
-# }
+create_target_group() {
+	echo "Creating target group..."
+	if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port $2 --vpc-id $VPC_ID --health-check-path $3 | $JQ ".TargetGroups[0].TargetGroupName") == "$TARGET_GROUP-$1" ]]; then
+		echo "Target group created!"
+	else
+		echo "Error creating target group."
+		return 1
+  fi
+}
 
-# get_target_group_arn() {
-# 	echo "Getting target group arn..."
-#   if target_group_arn=$(aws elbv2 describe-target-groups --name "$TARGET_GROUP-$1" | $JQ ".TargetGroups[0].TargetGroupArn"); then
-#     echo "Target group arn: $target_group_arn"
-#   else
-#     echo "Failed to get target group arn."
-#     return 1
-#   fi
-# }
-#
-# get_listener_priority() {
-# 	echo "Getting listener priority..."
-#   if length=$(aws elbv2 describe-rules --listener-arn $LOAD_BALANCER_LISTENER_ARN | $JQ  ".Rules | length"); then
-# 		length=$(($length+1))
-#     echo "Listener priority: $length"
-#   else
-#     echo "Failed to get target group arn."
-#     return 1
-#   fi
-# }
-#
-# create_listener() {
-# 	echo "Creating listener..."
-# 	if [[ $(aws elbv2 create-rule --listener-arn $LOAD_BALANCER_LISTENER_ARN --priority $length --conditions Field=path-pattern,Values="/${SHORT_GIT_HASH}" --actions Type=forward,TargetGroupArn=$target_group_arn | $JQ ".Rules[0].Actions[0].TargetGroupArn") == $target_group_arn ]]; then
-# 		echo "Listener created!"
-# 	else
-# 		echo "Error creating listener."
-# 		return 1
-#   fi
-# }
+create_service() {
+	echo "Creating service..."
+  if [[ $(aws ecs create-service --cluster $ECS_CLUSTER --service-name "$ECS_SERVICE-$1" --task-definition $revision --desired-count 1 | $JQ ".service.taskDefinition") == $revision ]]; then
+		echo "Service created!"
+	else
+		echo "Error creating service."
+		return 1
+  fi
+}
 
 
 # main
