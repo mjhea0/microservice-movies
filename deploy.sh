@@ -130,8 +130,8 @@ create_service() {
 
 create_target_group() {
 	echo "Creating target group..."
-	if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port 80 --vpc-id $VPC_ID --health-check-path $2 | $JQ ".TargetGroups[0].TargetGroupName") == $TARGET_GROUP ]]; then
-		echo "Target group created - $TARGET_GROUP!"
+	if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port 80 --vpc-id $VPC_ID --health-check-path $2 | $JQ ".TargetGroups[0].TargetGroupName") == "$TARGET_GROUP-$1" ]]; then
+		echo "Target group created!"
 	else
 		echo "Error creating target group."
 		return 1
