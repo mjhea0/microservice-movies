@@ -66,29 +66,32 @@ create_task_defs() {
 	echo "Creating users task definition..."
   family="sample-users-review-td"
   template="users-review.json"
-  task_template=$(cat "ecs/$template")
+  task_template=$(cat "ecs/tasks/$template")
   task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
   echo "$task_def"
   echo "Users task definition created!"
   register_definition
+	create_target_group "users" "3000" "/users/ping"
   # movies
 	echo "Creating movies task definition..."
   family="sample-movies-review-td"
   template="movies-review.json"
-  task_template=$(cat "ecs/$template")
+  task_template=$(cat "ecs/tasks/$template")
   task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
   echo "$task_def"
   echo "Movies task definition created!"
   register_definition
+	create_target_group "movies" "3000" "/movies/ping"
   # web
 	echo "Creating web task definition..."
   family="sample-web-review-td"
   template="web-review.json"
-  task_template=$(cat "ecs/$template")
+  task_template=$(cat "ecs/tasks/$template")
   task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
   echo "$task_def"
   echo "Web task definition created!"
   register_definition
+	create_target_group "web" "9000" "/"
 }
 
 register_definition() {
