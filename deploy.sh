@@ -118,25 +118,25 @@ register_definition() {
   fi
 }
 
-create_service() {
-	echo "Creating service..."
-  if [[ $(aws ecs create-service --cluster $ECS_CLUSTER --service-name "$ECS_SERVICE-$1" --task-definition $revision --desired-count 1 | $JQ ".service.taskDefinition") == $revision ]]; then
-		echo "Service created!"
-	else
-		echo "Error creating service."
-		return 1
-  fi
-}
-
-create_target_group() {
-	echo "Creating target group..."
-	if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port $2 --vpc-id $VPC_ID --health-check-path $3 | $JQ ".TargetGroups[0].TargetGroupName") == "$TARGET_GROUP-$1" ]]; then
-		echo "Target group created!"
-	else
-		echo "Error creating target group."
-		return 1
-  fi
-}
+# create_service() {
+# 	echo "Creating service..."
+#   if [[ $(aws ecs create-service --cluster $ECS_CLUSTER --service-name "$ECS_SERVICE-$1" --task-definition $revision --desired-count 1 | $JQ ".service.taskDefinition") == $revision ]]; then
+# 		echo "Service created!"
+# 	else
+# 		echo "Error creating service."
+# 		return 1
+#   fi
+# }
+#
+# create_target_group() {
+# 	echo "Creating target group..."
+# 	if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port $2 --vpc-id $VPC_ID --health-check-path $3 | $JQ ".TargetGroups[0].TargetGroupName") == "$TARGET_GROUP-$1" ]]; then
+# 		echo "Target group created!"
+# 	else
+# 		echo "Error creating target group."
+# 		return 1
+#   fi
+# }
 
 # get_target_group_arn() {
 # 	echo "Getting target group arn..."
