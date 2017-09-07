@@ -73,7 +73,7 @@ create_task_defs() {
   echo "Users task definition created!"
   register_definition
 	create_service "users"
-	create_target_group "users" "/users/ping"
+	create_target_group "users" "3000" "/users/ping"
 	get_target_group_arn "users"
 	get_listener_priority
 	create_listener
@@ -87,7 +87,7 @@ create_task_defs() {
   echo "Movies task definition created!"
   register_definition
 	create_service "movies"
-	create_target_group "movies" "/movies/ping"
+	create_target_group "movies" "3000" "/movies/ping"
 	get_target_group_arn "movies"
 	get_listener_priority
 	create_listener
@@ -101,7 +101,7 @@ create_task_defs() {
   echo "Web task definition created!"
   register_definition
 	create_service "web"
-	create_target_group "web" "/"
+	create_target_group "web" "9000" "/"
 	get_target_group_arn "web"
 	get_listener_priority
 	create_listener
@@ -130,7 +130,7 @@ create_service() {
 
 create_target_group() {
 	echo "Creating target group..."
-	if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port 80 --vpc-id $VPC_ID --health-check-path $2 | $JQ ".TargetGroups[0].TargetGroupName") == "$TARGET_GROUP-$1" ]]; then
+	if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port $2 --vpc-id $VPC_ID --health-check-path $3 | $JQ ".TargetGroups[0].TargetGroupName") == "$TARGET_GROUP-$1" ]]; then
 		echo "Target group created!"
 	else
 		echo "Error creating target group."
