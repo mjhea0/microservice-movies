@@ -72,6 +72,7 @@ create_task_defs() {
   echo "Users task definition created!"
   register_definition
 	create_target_group "users" "3000" "/users/ping"
+	get_target_group_arn "users"
   # movies
 	echo "Creating movies task definition..."
   family="sample-movies-review-td"
@@ -82,6 +83,7 @@ create_task_defs() {
   echo "Movies task definition created!"
   register_definition
 	create_target_group "movies" "3000" "/movies/ping"
+	get_target_group_arn "movies"
   # web
 	echo "Creating web task definition..."
   family="sample-web-review-td"
@@ -92,6 +94,7 @@ create_task_defs() {
   echo "Web task definition created!"
   register_definition
 	create_target_group "web" "9000" "/"
+	get_target_group_arn "web"
 }
 
 register_definition() {
@@ -114,7 +117,18 @@ create_target_group() {
 		return 1
   fi
 }
-# 
+
+get_target_group_arn() {
+	echo "Getting target group arn..."
+  if target_group_arn=$(aws elbv2 describe-target-groups --name "$TARGET_GROUP-$1" | $JQ ".TargetGroups[0].TargetGroupArn"); then
+    echo "Target group arn: $target_group_arn"
+  else
+    echo "Failed to get target group arn."
+    return 1
+  fi
+}
+
+#
 # create_service() {
 # 	echo "Creating service..."
 #   if [[ $(aws ecs create-service --cluster $ECS_CLUSTER --service-name "$ECS_SERVICE-$1" --task-definition $revision --desired-count 1 | $JQ ".service.taskDefinition") == $revision ]]; then
@@ -124,7 +138,6 @@ create_target_group() {
 # 		return 1
 #   fi
 # }
-
 
 # main
 

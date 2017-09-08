@@ -1,0 +1,15 @@
+{
+  "cluster": "ecs-cluster",
+  "serviceName": "webapp-service",
+  "taskDefinition": "webapp:1",
+  "loadBalancers": [
+      {
+          "targetGroupArn": "test",
+          "loadBalancerName": "webapp-load-balancer",
+          "containerName": "webapp",
+          "containerPort": 80
+      }
+  ],
+  "desiredCount": 3,
+  "role": "ecsServiceRole"
+}
