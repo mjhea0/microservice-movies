@@ -73,6 +73,11 @@ create_task_defs() {
   register_definition
 	create_target_group "users" "3000" "/users/ping"
 	get_target_group_arn "users"
+	service_template_name="users-review_service.json"
+  service_template=$(cat "ecs/services/$service_template_name")
+  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-users" $revision $target_group_arn)
+  echo "$service"
+	create_service
   # movies
 	echo "Creating movies task definition..."
   family="sample-movies-review-td"
@@ -84,6 +89,11 @@ create_task_defs() {
   register_definition
 	create_target_group "movies" "3000" "/movies/ping"
 	get_target_group_arn "movies"
+	service_template_name="movies-review_service.json"
+  service_template=$(cat "ecs/services/$service_template_name")
+  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-movies" $revision $target_group_arn)
+  echo "$service"
+	create_service
   # web
 	echo "Creating web task definition..."
   family="sample-web-review-td"
@@ -95,6 +105,11 @@ create_task_defs() {
   register_definition
 	create_target_group "web" "9000" "/"
 	get_target_group_arn "web"
+	service_template_name="web-review_service.json"
+  service_template=$(cat "ecs/services/$service_template_name")
+  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-web" $revision $target_group_arn)
+  echo "$service"
+	create_service
 }
 
 register_definition() {
@@ -128,16 +143,15 @@ get_target_group_arn() {
   fi
 }
 
-#
-# create_service() {
-# 	echo "Creating service..."
-#   if [[ $(aws ecs create-service --cluster $ECS_CLUSTER --service-name "$ECS_SERVICE-$1" --task-definition $revision --desired-count 1 | $JQ ".service.taskDefinition") == $revision ]]; then
-# 		echo "Service created!"
-# 	else
-# 		echo "Error creating service."
-# 		return 1
-#   fi
-# }
+create_service() {
+	echo "Creating service..."
+  if [[ $(aws ecs create-service --cli-input-json "$service" | $JQ ".service.taskDefinition") == $revision ]]; then
+		echo "Service created!"
+	else
+		echo "Error creating service."
+		return 1
+  fi
+}
 
 # main
 

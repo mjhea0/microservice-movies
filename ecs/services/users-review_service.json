@@ -1,15 +1,15 @@
 {
-  "cluster": "ecs-cluster",
-  "serviceName": "webapp-service",
-  "taskDefinition": "webapp:1",
+  "cluster": "%s",
+  "serviceName": "%s",
+  "taskDefinition": "%s",
   "loadBalancers": [
-      {
-          "targetGroupArn": "test",
-          "loadBalancerName": "webapp-load-balancer",
-          "containerName": "webapp",
-          "containerPort": 80
-      }
+    {
+      "targetGroupArn": "%s",
+      "loadBalancerName": "ecs",
+      "containerName": "users-service-review",
+      "containerPort": 3000
+    }
   ],
-  "desiredCount": 3,
+  "desiredCount": 1,
   "role": "ecsServiceRole"
 }

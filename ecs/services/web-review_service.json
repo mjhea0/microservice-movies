@@ -1,39 +1,15 @@
 {
-  "containerDefinitions": [
+  "cluster": "%s",
+  "serviceName": "%s",
+  "taskDefinition": "%s",
+  "loadBalancers": [
     {
-      "name": "web-service-review",
-      "image": "%s.dkr.ecr.us-east-1.amazonaws.com\/sample\/web-service-review:review",
-      "essential": true,
-      "memoryReservation": 300,
-      "cpu": 300,
-      "portMappings": [
-        {
-          "containerPort": 9000,
-          "hostPort": 0,
-          "protocol": "tcp"
-        }
-      ],
-      "environment": [
-        {
-          "name": "NODE_ENV",
-          "value": "test"
-        },
-        {
-          "name": "REACT_APP_USERS_SERVICE_URL",
-          "value": "%s"
-        },
-        {
-          "name": "REACT_APP_MOVIES_SERVICE_URL",
-          "value": "%s"
-        }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "sample",
-          "awslogs-region": "%s"
-        }
-      }
+      "targetGroupArn": "%s",
+      "loadBalancerName": "ecs",
+      "containerName": "web-service-review",
+      "containerPort": 9000
     }
-  ]
+  ],
+  "desiredCount": 1,
+  "role": "ecsServiceRole"
 }
