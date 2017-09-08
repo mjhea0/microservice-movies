@@ -74,6 +74,8 @@ create_task_defs() {
   register_definition
 	create_target_group "users" "3000" "/users/ping"
 	get_target_group_arn "users"
+	get_listener_priority
+	create_listener
 	service_template_name="users-review_service.json"
   service_template=$(cat "ecs/services/$service_template_name")
   service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-users" $revision $target_group_arn)
@@ -141,6 +143,27 @@ get_target_group_arn() {
   else
     echo "Failed to get target group arn."
     return 1
+  fi
+}
+
+get_listener_priority() {
+	echo "Getting listener priority..."
+  if length=$(aws elbv2 describe-rules --listener-arn $LOAD_BALANCER_LISTENER_ARN | $JQ  ".Rules | length"); then
+		length=$(($length+1))
+    echo "Listener priority: $length"
+  else
+    echo "Failed to get target group arn."
+    return 1
+  fi
+}
+
+create_listener() {
+	echo "Creating listener..."
+	if [[ $(aws elbv2 create-rule --listener-arn $LOAD_BALANCER_LISTENER_ARN --priority $length --conditions Field=path-pattern,Values="/${SHORT_GIT_HASH}" --actions Type=forward,TargetGroupArn=$target_group_arn | $JQ ".Rules[0].Actions[0].TargetGroupArn") == $target_group_arn ]]; then
+		echo "Listener created!"
+	else
+		echo "Error creating listener."
+		return 1
   fi
 }
 
