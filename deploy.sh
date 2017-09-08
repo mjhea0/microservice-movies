@@ -62,6 +62,59 @@ tag_and_push_images() {
 	echo "Images tagged and pushed!"
 }
 
+# create_task_defs() {
+#   # users
+# 	echo "Creating users task definition..."
+#   family="sample-users-review-td"
+#   template="users-review.json"
+#   task_template=$(cat "ecs/tasks/$template")
+#   task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
+#   echo "$task_def"
+#   echo "Users task definition created!"
+#   register_definition
+# 	create_target_group "users" "3000" "/users/ping"
+# 	get_target_group_arn "users"
+# 	get_listener_priority
+# 	create_listener "/users*"
+# 	service_template_name="users-review_service.json"
+#   service_template=$(cat "ecs/services/$service_template_name")
+#   service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-users" $revision $target_group_arn)
+#   echo "$service"
+# 	create_service
+#   # movies
+# 	echo "Creating movies task definition..."
+#   family="sample-movies-review-td"
+#   template="movies-review.json"
+#   task_template=$(cat "ecs/tasks/$template")
+#   task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
+#   echo "$task_def"
+#   echo "Movies task definition created!"
+#   register_definition
+# 	create_target_group "movies" "3000" "/movies/ping"
+# 	get_target_group_arn "movies"
+# 	service_template_name="movies-review_service.json"
+#   service_template=$(cat "ecs/services/$service_template_name")
+#   service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-movies" $revision $target_group_arn)
+#   echo "$service"
+# 	create_service
+#   # web
+# 	echo "Creating web task definition..."
+#   family="sample-web-review-td"
+#   template="web-review.json"
+#   task_template=$(cat "ecs/tasks/$template")
+#   task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
+#   echo "$task_def"
+#   echo "Web task definition created!"
+#   register_definition
+# 	create_target_group "web" "9000" "/"
+# 	get_target_group_arn "web"
+# 	service_template_name="web-review_service.json"
+#   service_template=$(cat "ecs/services/$service_template_name")
+#   service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-web" $revision $target_group_arn)
+#   echo "$service"
+# 	create_service
+# }
+
 create_task_defs() {
   # users
 	echo "Creating users task definition..."
@@ -75,44 +128,33 @@ create_task_defs() {
 	create_target_group "users" "3000" "/users/ping"
 	get_target_group_arn "users"
 	get_listener_priority
-	create_listener
-	service_template_name="users-review_service.json"
-  service_template=$(cat "ecs/services/$service_template_name")
-  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-users" $revision $target_group_arn)
-  echo "$service"
-	create_service
+	create_listener "/users*"
   # movies
 	echo "Creating movies task definition..."
   family="sample-movies-review-td"
   template="movies-review.json"
   task_template=$(cat "ecs/tasks/$template")
-  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
+  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
   echo "$task_def"
   echo "Movies task definition created!"
   register_definition
 	create_target_group "movies" "3000" "/movies/ping"
 	get_target_group_arn "movies"
-	service_template_name="movies-review_service.json"
-  service_template=$(cat "ecs/services/$service_template_name")
-  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-movies" $revision $target_group_arn)
-  echo "$service"
-	create_service
+	get_listener_priority
+	create_listener "/movies*"
   # web
 	echo "Creating web task definition..."
   family="sample-web-review-td"
   template="web-review.json"
   task_template=$(cat "ecs/tasks/$template")
-  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
+  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
   echo "$task_def"
   echo "Web task definition created!"
   register_definition
 	create_target_group "web" "9000" "/"
 	get_target_group_arn "web"
-	service_template_name="web-review_service.json"
-  service_template=$(cat "ecs/services/$service_template_name")
-  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-web" $revision $target_group_arn)
-  echo "$service"
-	create_service
+	get_listener_priority
+	create_listener "/"
 }
 
 register_definition() {
@@ -159,7 +201,7 @@ get_listener_priority() {
 
 create_listener() {
 	echo "Creating listener..."
-	if [[ $(aws elbv2 create-rule --listener-arn $LOAD_BALANCER_LISTENER_ARN --priority $length --conditions Field=path-pattern,Values="/${SHORT_GIT_HASH}" --actions Type=forward,TargetGroupArn=$target_group_arn | $JQ ".Rules[0].Actions[0].TargetGroupArn") == $target_group_arn ]]; then
+	if [[ $(aws elbv2 create-rule --listener-arn $LOAD_BALANCER_LISTENER_ARN --priority $length --conditions Field=path-pattern,Values="/${SHORT_GIT_HASH}$1" --actions Type=forward,TargetGroupArn=$target_group_arn | $JQ ".Rules[0].Actions[0].TargetGroupArn") == $target_group_arn ]]; then
 		echo "Listener created!"
 	else
 		echo "Error creating listener."
@@ -167,15 +209,15 @@ create_listener() {
   fi
 }
 
-create_service() {
-	echo "Creating service..."
-  if [[ $(aws ecs create-service --cli-input-json "$service" | $JQ ".service.taskDefinition") == $revision ]]; then
-		echo "Service created!"
-	else
-		echo "Error creating service."
-		return 1
-  fi
-}
+# create_service() {
+# 	echo "Creating service..."
+#   if [[ $(aws ecs create-service --cli-input-json "$service" | $JQ ".service.taskDefinition") == $revision ]]; then
+# 		echo "Service created!"
+# 	else
+# 		echo "Error creating service."
+# 		return 1
+#   fi
+# }
 
 # main
 
