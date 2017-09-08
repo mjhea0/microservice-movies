@@ -111,7 +111,7 @@ create_task_defs() {
 	create_target_group "web" "9000" "/"
 	get_target_group_arn "web"
 	get_listener_priority
-	create_listener "/"
+	create_listener ""
 	service_template_name="web-review_service.json"
   service_template=$(cat "ecs/services/$service_template_name")
   service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-web" $revision $target_group_arn)
