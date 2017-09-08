@@ -76,17 +76,12 @@ create_task_defs() {
 	get_target_group_arn "users"
 	get_listener_priority
 	create_listener "/users*"
-	service_template_name="users-review_service.json"
-  service_template=$(cat "ecs/services/$service_template_name")
-  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-users" $revision $target_group_arn)
-  echo "$service"
-	create_service
   # movies
 	echo "Creating movies task definition..."
   family="sample-movies-review-td"
   template="movies-review.json"
   task_template=$(cat "ecs/tasks/$template")
-  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
+  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
   echo "$task_def"
   echo "Movies task definition created!"
   register_definition
@@ -94,17 +89,12 @@ create_task_defs() {
 	get_target_group_arn "movies"
 	get_listener_priority
 	create_listener "/movies*"
-	service_template_name="movies-review_service.json"
-  service_template=$(cat "ecs/services/$service_template_name")
-  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-movies" $revision $target_group_arn)
-  echo "$service"
-	create_service
   # web
 	echo "Creating web task definition..."
   family="sample-web-review-td"
   template="web-review.json"
   task_template=$(cat "ecs/tasks/$template")
-  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
+  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $ECS_REGION)
   echo "$task_def"
   echo "Web task definition created!"
   register_definition
@@ -112,11 +102,6 @@ create_task_defs() {
 	get_target_group_arn "web"
 	get_listener_priority
 	create_listener "/"
-	service_template_name="web-review_service.json"
-  service_template=$(cat "ecs/services/$service_template_name")
-  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-web" $revision $target_group_arn)
-  echo "$service"
-	create_service
 }
 
 register_definition() {
