@@ -114,6 +114,16 @@ create_target_group() {
 		return 1
   fi
 }
+# 
+# create_service() {
+# 	echo "Creating service..."
+#   if [[ $(aws ecs create-service --cluster $ECS_CLUSTER --service-name "$ECS_SERVICE-$1" --task-definition $revision --desired-count 1 | $JQ ".service.taskDefinition") == $revision ]]; then
+# 		echo "Service created!"
+# 	else
+# 		echo "Error creating service."
+# 		return 1
+#   fi
+# }
 
 
 # main
