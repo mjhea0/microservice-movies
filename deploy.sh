@@ -19,6 +19,7 @@ IMAGE_BASE="microservicemovies"
 ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${ECS_REGION}.amazonaws.com"
 SHORT_GIT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
 TARGET_GROUP=$SHORT_GIT_HASH
+ECS_SERVICE=$SHORT_GIT_HASH
 
 
 # helpers
