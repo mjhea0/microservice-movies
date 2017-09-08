@@ -5,7 +5,6 @@
   "loadBalancers": [
     {
       "targetGroupArn": "%s",
-      "loadBalancerName": "ecs",
       "containerName": "movies-service-review",
       "containerPort": 3000
     }
