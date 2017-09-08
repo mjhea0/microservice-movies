@@ -171,15 +171,15 @@ create_listener() {
   fi
 }
 
-# create_service() {
-# 	echo "Creating service..."
-#   if [[ $(aws ecs create-service --cli-input-json "$service" | $JQ ".service.taskDefinition") == $revision ]]; then
-# 		echo "Service created!"
-# 	else
-# 		echo "Error creating service."
-# 		return 1
-#   fi
-# }
+create_service() {
+	echo "Creating service..."
+  if [[ $(aws ecs create-service --cli-input-json "$service" | $JQ ".service.taskDefinition") == $revision ]]; then
+		echo "Service created!"
+	else
+		echo "Error creating service."
+		return 1
+  fi
+}
 
 # main
 
