@@ -152,7 +152,7 @@ get_target_group_arn() {
 
 get_listener_priority() {
 	echo "Getting listener priority..."
-  if length=$(aws elbv2 describe-rules --listener-arn $LOAD_BALANCER_LISTENER_ARN | $JQ  ".Rules | length"); then
+  if length=$(aws elbv2 describe-rules --listener-arn $LOAD_BALANCER_LISTENER_ARN | $JQ 'del(.Rules[] | select(.Priority == "default")) | .Rules | max_by(.Priority)'); then
 		length=$(($length+1))
     echo "Listener priority: $length"
   else
