@@ -150,7 +150,11 @@ get_target_group_arn() {
 get_listener_port() {
 	echo "Getting listener port..."
   if port=$(aws elbv2 describe-listeners --load-balancer-arn $LOAD_BALANCER_ARN | $JQ ".Listeners | max_by(.Port) | .Port"); then
-		port=$(($port+1))
+		if [[ port === "80" ]]; then
+			port=30000
+		else
+			port=$(($port+1))
+		fi
     echo "Listener port: $port"
   else
     echo "Failed to get listener port."
