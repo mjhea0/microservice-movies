@@ -76,6 +76,11 @@ create_task_defs() {
 	create_target_group "users" "3000" "/users/ping"
 	get_target_group_arn "users"
   add_rules "1" "/users*"
+	service_template_name="users-review_service.json"
+	service_template=$(cat "ecs/services/$service_template_name")
+	service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-users" $revision $target_group_arn)
+	echo "$service"
+	create_service
   # movies
 	echo "Creating movies task definition..."
   family="sample-movies-review-td"
@@ -88,6 +93,11 @@ create_task_defs() {
 	create_target_group "movies" "3000" "/movies/ping"
 	get_target_group_arn "movies"
   add_rules "2" "/movies*"
+	service_template_name="movies-review_service.json"
+	service_template=$(cat "ecs/services/$service_template_name")
+	service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-movies" $revision $target_group_arn)
+	echo "$service"
+	create_service
   # web
 	echo "Creating web task definition..."
   family="sample-web-review-td"
@@ -99,6 +109,11 @@ create_task_defs() {
   register_definition
 	create_target_group "web" "9000" "/"
   add_rules "3" "/"
+	service_template_name="web-review_service.json"
+  service_template=$(cat "ecs/services/$service_template_name")
+  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-web" $revision $target_group_arn)
+  echo "$service"
+	create_service
 }
 
 register_definition() {
