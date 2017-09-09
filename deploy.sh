@@ -13,7 +13,8 @@ JQ="jq --raw-output --exit-status"
 ECS_REGION="us-east-1"
 ECS_CLUSTER="review"
 VPC_ID="vpc-26ba875f"
-LOAD_BALANCER_LISTENER_ARN="arn:aws:elasticloadbalancing:us-east-1:046505967931:listener/app/ecs/1dec50e459068da0/e78a1bac4963dfaf"
+LOAD_BALANCER_ARN="arn:aws:elasticloadbalancing:us-east-1:046505967931:loadbalancer/app/ecs/1dec50e459068da0"
+SAMPLE_TARGET_GROUP_ARN="arn:aws:elasticloadbalancing:us-east-1:046505967931:targetgroup/sample/a0d69d13b86e6813"
 NAMESPACE="sample"
 IMAGE_BASE="microservicemovies"
 ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${ECS_REGION}.amazonaws.com"
@@ -74,13 +75,7 @@ create_task_defs() {
   register_definition
 	create_target_group "users" "3000" "/users/ping"
 	get_target_group_arn "users"
-	get_listener_priority
-	create_listener "/users*"
-	service_template_name="users-review_service.json"
-	service_template=$(cat "ecs/services/$service_template_name")
-	service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-users" $revision $target_group_arn)
-	echo "$service"
-	create_service
+  add_rules "1" "/users*"
   # movies
 	echo "Creating movies task definition..."
   family="sample-movies-review-td"
@@ -92,13 +87,7 @@ create_task_defs() {
   register_definition
 	create_target_group "movies" "3000" "/movies/ping"
 	get_target_group_arn "movies"
-	get_listener_priority
-	create_listener "/movies*"
-	service_template_name="movies-review_service.json"
-	service_template=$(cat "ecs/services/$service_template_name")
-	service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-movies" $revision $target_group_arn)
-	echo "$service"
-	create_service
+  add_rules "2" "/movies*"
   # web
 	echo "Creating web task definition..."
   family="sample-web-review-td"
@@ -109,14 +98,7 @@ create_task_defs() {
   echo "Web task definition created!"
   register_definition
 	create_target_group "web" "9000" "/"
-	get_target_group_arn "web"
-	get_listener_priority
-	create_listener ""
-	service_template_name="web-review_service.json"
-  service_template=$(cat "ecs/services/$service_template_name")
-  service=$(printf "$service_template" $ECS_CLUSTER "$ECS_SERVICE-web" $revision $target_group_arn)
-  echo "$service"
-	create_service
+  add_rules "3" "/"
 }
 
 register_definition() {
@@ -150,23 +132,33 @@ get_target_group_arn() {
   fi
 }
 
-get_listener_priority() {
-	echo "Getting listener priority..."
-  if length=$(aws elbv2 describe-rules --listener-arn arn:aws:elasticloadbalancing:us-east-1:046505967931:listener/app/ecs/1dec50e459068da0/e78a1bac4963dfaf | $JQ 'del(.Rules[] | select(.Priority == "default")) | .Rules | max_by(.Priority) | .Priority'); then
-		length=$(($length+1))
-    echo "Listener priority: $length"
+get_listener_port() {
+	echo "Getting listener port..."
+  if port=$(aws elbv2 describe-listeners --load-balancer-arn $LOAD_BALANCER_ARN | $JQ ".Listeners | max_by(.Port) | .Port"); then
+		port=$(($port+1))
+    echo "Listener port: $port"
   else
-    echo "Failed to get target group arn."
+    echo "Failed to get listener port."
     return 1
   fi
 }
 
 create_listener() {
 	echo "Creating listener..."
-	if [[ $(aws elbv2 create-rule --listener-arn $LOAD_BALANCER_LISTENER_ARN --priority $length --conditions Field=path-pattern,Values="/${SHORT_GIT_HASH}$1" --actions Type=forward,TargetGroupArn=$target_group_arn | $JQ ".Rules[0].Actions[0].TargetGroupArn") == $target_group_arn ]]; then
-		echo "Listener created!"
+	if load_balaner_listener_arn=$(aws elbv2 create-listener --load-balancer-arn $LOAD_BALANCER_ARN --protocol HTTP --port 30334 --default-actions Type=forward,TargetGroupArn=$SAMPLE_TARGET_GROUP_ARN | $JQ ".Listeners[0].ListenerArn"); then
+		echo "Listener created - $load_balaner_listener_arn"
 	else
 		echo "Error creating listener."
+		return 1
+  fi
+}
+
+add_rules() {
+	echo "Add rules..."
+	if [[ $(aws elbv2 create-rule --listener-arn $load_balaner_listener_arn --priority $1 --conditions Field=path-pattern,Values="$2" --actions Type=forward,TargetGroupArn=$target_group_arn | $JQ ".Rules[0].Actions[0].TargetGroupArn") == $target_group_arn ]]; then
+		echo "Rules created!"
+	else
+		echo "Error creating rule."
 		return 1
   fi
 }
@@ -186,4 +178,6 @@ create_service() {
 configure_aws_cli
 get_cluster
 tag_and_push_images
+get_listener_port
+create_listener
 create_task_defs
