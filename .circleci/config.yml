@@ -38,3 +38,6 @@ jobs:
       - run:
           name: Test the movies service
           command: docker-compose -f docker-compose-review.yml run movies-service-review npm test
+      - run:
+          name: Deploy
+          command: sh ecs/deploy.sh
