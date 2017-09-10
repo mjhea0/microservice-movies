@@ -20,6 +20,7 @@ IMAGE_BASE="microservicemovies"
 ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${ECS_REGION}.amazonaws.com"
 SHORT_GIT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
 TAG=$SHORT_GIT_HASH
+TARGET_GROUP=$SHORT_GIT_HASH
 
 # helpers
 
@@ -71,6 +72,8 @@ create_task_defs() {
   echo "$task_def"
   echo "Users task definition created!"
   register_definition
+  create_target_group "users" "3000" "/users/ping"
+  get_target_group_arn "users"
   # movies
   echo "Creating movies task definition..."
   family="sample-movies-review-td"
@@ -80,6 +83,8 @@ create_task_defs() {
   echo "$task_def"
   echo "Movies task definition created!"
   register_definition
+  create_target_group "movies" "3000" "/movies/ping"
+  get_target_group_arn "movies"
   # web
   echo "Creating web task definition..."
   family="sample-web-review-td"
@@ -89,6 +94,8 @@ create_task_defs() {
   echo "$task_def"
   echo "Web task definition created!"
   register_definition
+  create_target_group "web" "9000" "/"
+  get_target_group_arn "web"
 }
 
 register_definition() {
@@ -98,6 +105,26 @@ register_definition() {
     echo "Task definition registered!"
   else
     echo "Failed to register task definition"
+    return 1
+  fi
+}
+
+create_target_group() {
+  echo "Creating target group..."
+  if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port $2 --vpc-id $VPC_ID --health-check-path $3 | $JQ ".TargetGroups[0].TargetGroupName") == "$TARGET_GROUP-$1" ]]; then
+      echo "Target group created!"
+  else
+      echo "Error creating target group."
+      return 1
+  fi
+}
+
+get_target_group_arn() {
+  echo "Getting target group arn..."
+  if target_group_arn=$(aws elbv2 describe-target-groups --name "$TARGET_GROUP-$1" | $JQ ".TargetGroups[0].TargetGroupArn"); then
+    echo "Target group arn: $target_group_arn"
+  else
+    echo "Failed to get target group arn."
     return 1
   fi
 }
