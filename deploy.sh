@@ -11,7 +11,7 @@ set -e
 JQ="jq --raw-output --exit-status"
 
 ECS_REGION="us-east-1"
-ECS_CLUSTER="review"
+ECS_CLUSTER="review2"
 VPC_ID="vpc-26ba875f"
 LOAD_BALANCER_ARN="arn:aws:elasticloadbalancing:us-east-1:046505967931:loadbalancer/app/ecs/1dec50e459068da0"
 SAMPLE_TARGET_GROUP_ARN="arn:aws:elasticloadbalancing:us-east-1:046505967931:targetgroup/sample/a0d69d13b86e6813"
@@ -108,6 +108,7 @@ create_task_defs() {
   echo "Web task definition created!"
   register_definition
 	create_target_group "web" "9000" "/"
+	get_target_group_arn "web"
   add_rules "3" "/"
 	service_template_name="web-review_service.json"
   service_template=$(cat "ecs/services/$service_template_name")
