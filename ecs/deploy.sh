@@ -61,9 +61,50 @@ tag_and_push_images() {
   echo "Images tagged and pushed!"
 }
 
+create_task_defs() {
+  # users
+  echo "Creating users task definition..."
+  family="sample-users-review-td"
+  template="users-review_task.json"
+  task_template=$(cat "tasks/$template")
+  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION)
+  echo "$task_def"
+  echo "Users task definition created!"
+  register_definition
+  # movies
+  echo "Creating movies task definition..."
+  family="sample-movies-review-td"
+  template="movies-review_task.json"
+  task_template=$(cat "tasks/$template")
+  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION)
+  echo "$task_def"
+  echo "Movies task definition created!"
+  register_definition
+  # web
+  echo "Creating web task definition..."
+  family="sample-web-review-td"
+  template="web-review_task.json"
+  task_template=$(cat "tasks/$template")
+  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION)
+  echo "$task_def"
+  echo "Web task definition created!"
+  register_definition
+}
+
+register_definition() {
+  echo "Registering task definition..."
+  if revision=$(aws ecs register-task-definition --cli-input-json "$task_def" --family $family | $JQ '.taskDefinition.taskDefinitionArn'); then
+    echo "Revision: $revision"
+    echo "Task definition registered!"
+  else
+    echo "Failed to register task definition"
+    return 1
+  fi
+}
 
 # main
 
 configure_aws_cli
 get_cluster
 tag_and_push_images
+create_task_defs
