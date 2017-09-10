@@ -165,7 +165,7 @@ get_listener_port() {
 
 create_listener() {
 	echo "Creating listener..."
-	if load_balaner_listener_arn=$(aws elbv2 create-listener --load-balancer-arn $LOAD_BALANCER_ARN --protocol HTTP --port 30334 --default-actions Type=forward,TargetGroupArn=$SAMPLE_TARGET_GROUP_ARN | $JQ ".Listeners[0].ListenerArn"); then
+	if load_balaner_listener_arn=$(aws elbv2 create-listener --load-balancer-arn $LOAD_BALANCER_ARN --protocol HTTP --port $port --default-actions Type=forward,TargetGroupArn=$SAMPLE_TARGET_GROUP_ARN | $JQ ".Listeners[0].ListenerArn"); then
 		echo "Listener created - $load_balaner_listener_arn"
 	else
 		echo "Error creating listener."
