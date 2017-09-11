@@ -15,6 +15,9 @@ ECS_CLUSTER="microservicemovies-review"
 VPC_ID="vpc-de9d90a7"
 LOAD_BALANCER_ARN="arn:aws:elasticloadbalancing:us-east-1:046505967931:loadbalancer/app/microservicemovies-review/90696c5b5a4c298d"
 DEFAULT_TARGET_GROUP_ARN="arn:aws:elasticloadbalancing:us-east-1:046505967931:targetgroup/review-default/cc1a3355ef993e5d"
+NAMESPACE="sample"
+IMAGE_BASE="microservicemovies"
+ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${ECS_REGION}.amazonaws.com"
 SHORT_GIT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
 TAG=$SHORT_GIT_HASH
 
