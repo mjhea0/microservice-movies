@@ -1,0 +1,75 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "users-service-review",
+      "image": "%s.dkr.ecr.%s.amazonaws.com\/sample\/users-service-review:%s",
+      "essential": true,
+      "memoryReservation": 300,
+      "cpu": 300,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 0,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "DATABASE_URL",
+          "value": "postgres://postgres:postgres@users-db-review:5432/users_dev"
+        },
+        {
+          "name": "DATABASE_TEST_URL",
+          "value": "postgres://postgres:postgres@users-db-review:5432/users_test"
+        },
+        {
+          "name": "NODE_ENV",
+          "value": "test"
+        },
+        {
+          "name": "TOKEN_SECRET",
+          "value": "changeme"
+        }
+      ],
+      "links": [
+        "users-db-review"
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "microservicemovies-review",
+          "awslogs-region": "%s"
+        }
+      }
+    },
+    {
+      "name": "users-db-review",
+      "image": "%s.dkr.ecr.%s.amazonaws.com\/sample\/users-db-review:%s",
+      "essential": true,
+      "memoryReservation": 300,
+      "cpu": 300,
+      "portMappings": [
+        {
+          "containerPort": 5432
+        }
+      ],
+      "environment": [
+        {
+          "name": "POSTGRES_USER",
+          "value": "postgres"
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "value": "postgres"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "microservicemovies-review",
+          "awslogs-region": "%s"
+        }
+      }
+    }
+  ]
+}

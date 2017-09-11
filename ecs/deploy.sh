@@ -35,11 +35,23 @@ configure_aws_cli() {
 get_cluster() {
   echo "Finding cluster..."
   command="aws ecs describe-clusters --cluster $ECS_CLUSTER"
-  if [[ $( $command | $JQ ".clusters[0].status") == 'ACTIVE' ]]; then
+  if [[ $($command | $JQ ".clusters[0].status") == 'ACTIVE' ]]; then
       echo "Cluster found!"
   else
       echo "Error finding cluster."
       return 1
+  fi
+}
+
+register_definition() {
+  echo "(3) Registering task definition..."
+  command="aws ecs register-task-definition --cli-input-json $task_def --family $family"
+  if revision=$($command | $JQ '.taskDefinition.taskDefinitionArn'); then
+    echo "Revision: $revision"
+    echo "Task definition registered!"
+  else
+    echo "Failed to register task definition"
+    return 1
   fi
 }
 
@@ -52,6 +64,14 @@ deploy_users() {
 	docker push ${ECR_URI}/${NAMESPACE}/users-db-review:${TAG}
   docker push ${ECR_URI}/${NAMESPACE}/users-service-review:${TAG}
   echo "Images tagged and pushed!"
+  echo "(2) Creating users task definition..."
+  family="sample-users-review-td"
+  template="users-review_task.json"
+  task_template=$(cat "ecs/tasks/$template")
+  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION)
+  echo "$task_def"
+  echo "Users task definition created!"
+  register_definition
 }
 
 deploy_movies() {
@@ -65,6 +85,14 @@ deploy_movies() {
 	docker push ${ECR_URI}/${NAMESPACE}/movies-service-review:${TAG}
 	docker push ${ECR_URI}/${NAMESPACE}/swagger-review:${TAG}
   echo "Images tagged and pushed!"
+  echo "(2) Creating movies task definition..."
+  family="sample-movies-review-td"
+  template="movies-review_task.json"
+  task_template=$(cat "ecs/tasks/$template")
+  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION)
+  echo "$task_def"
+  echo "Movies task definition created!"
+  register_definition
 }
 
 deploy_web() {
@@ -74,8 +102,15 @@ deploy_web() {
 	docker tag ${IMAGE_BASE}_web-service-review ${ECR_URI}/${NAMESPACE}/web-service-review:${TAG}
 	docker push ${ECR_URI}/${NAMESPACE}/web-service-review:${TAG}
   echo "Images tagged and pushed!"
+  echo "(2) Creating web task definition..."
+  family="sample-web-review-td"
+  template="web-review_task.json"
+  task_template=$(cat "ecs/tasks/$template")
+  task_def=$(printf "$task_template" $AWS_ACCOUNT_ID $ECS_REGION $TAG $ECS_REGION)
+  echo "$task_def"
+  echo "Web task definition created!"
+  register_definition
 }
-
 
 # main
 
