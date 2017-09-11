@@ -29,7 +29,7 @@ configure_aws_cli() {
 
 get_cluster() {
   echo "Finding cluster..."
-  command = "aws ecs describe-clusters --cluster $ECS_CLUSTER"
+  command="aws ecs describe-clusters --cluster $ECS_CLUSTER"
   if [[ $( $command | $JQ ".clusters[0].status") == 'ACTIVE' ]]; then
       echo "Cluster found!"
   else
