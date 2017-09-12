@@ -20,6 +20,7 @@ IMAGE_BASE="microservicemovies"
 ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${ECS_REGION}.amazonaws.com"
 SHORT_GIT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
 TAG=$SHORT_GIT_HASH
+TARGET_GROUP=$SHORT_GIT_HASH
 
 
 # helpers
@@ -36,10 +37,10 @@ get_cluster() {
   echo "Finding cluster..."
   command="aws ecs describe-clusters --cluster $ECS_CLUSTER"
   if [[ $($command | $JQ ".clusters[0].status") == 'ACTIVE' ]]; then
-      echo "Cluster found!"
+    echo "Cluster found!"
   else
-      echo "Error finding cluster."
-      return 1
+    echo "Error finding cluster."
+    return 1
   fi
 }
 
@@ -50,6 +51,26 @@ register_definition() {
     echo "Task definition registered!"
   else
     echo "Failed to register task definition"
+    return 1
+  fi
+}
+
+create_target_group() {
+  echo "(04) Creating target group..."
+  if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port $2 --vpc-id $VPC_ID --health-check-path $3 | $JQ ".TargetGroups[0].TargetGroupName") == "$TARGET_GROUP-$1" ]]; then
+    echo "Target group created!"
+  else
+    echo "Error creating target group."
+    return 1
+  fi
+}
+
+get_target_group_arn() {
+  echo "(5) Getting target group arn..."
+  if target_group_arn=$(aws elbv2 describe-target-groups --name "$TARGET_GROUP-$1" | $JQ ".TargetGroups[0].TargetGroupArn"); then
+    echo "Target group arn: $target_group_arn"
+  else
+    echo "Failed to get target group arn."
     return 1
   fi
 }
@@ -71,6 +92,8 @@ deploy_users() {
   echo "$task_def"
   echo "Users task definition created!"
   register_definition
+  create_target_group "users" "3000" "/users/ping"
+  get_target_group_arn "users"
 }
 
 deploy_movies() {
@@ -92,6 +115,8 @@ deploy_movies() {
   echo "$task_def"
   echo "Movies task definition created!"
   register_definition
+  create_target_group "movies" "3000" "/movies/ping"
+  get_target_group_arn "movies"
 }
 
 deploy_web() {
@@ -109,7 +134,10 @@ deploy_web() {
   echo "$task_def"
   echo "Web task definition created!"
   register_definition
+  create_target_group "web" "9000" "/"
+  get_target_group_arn "web"
 }
+
 
 # main
 
