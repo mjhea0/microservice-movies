@@ -1,0 +1,14 @@
+{
+  "cluster": "%s",
+  "serviceName": "%s",
+  "taskDefinition": "%s",
+  "loadBalancers": [
+    {
+      "targetGroupArn": "%s",
+      "containerName": "web-service-review",
+      "containerPort": 9000
+    }
+  ],
+  "desiredCount": 1,
+  "role": "ecsServiceRole"
+}
