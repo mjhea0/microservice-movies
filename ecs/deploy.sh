@@ -45,8 +45,7 @@ get_cluster() {
 
 register_definition() {
   echo "(3) Registering task definition..."
-  command='aws ecs register-task-definition --cli-input-json "$task_def" --family $family'
-  if revision=$($command | $JQ '.taskDefinition.taskDefinitionArn'); then
+  if revision=$(aws ecs register-task-definition --cli-input-json "$task_def" --family $family | $JQ '.taskDefinition.taskDefinitionArn'); then
     echo "Revision: $revision"
     echo "Task definition registered!"
   else
