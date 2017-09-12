@@ -75,6 +75,41 @@ get_target_group_arn() {
   fi
 }
 
+get_listener_port() {
+  echo "(6) Getting listener port..."
+  if port=$(aws elbv2 describe-listeners --load-balancer-arn $LOAD_BALANCER_ARN | $JQ ".Listeners | max_by(.Port) | .Port"); then
+    if [[ $port == "80" ]]; then
+      port=30000
+    else
+      port=$(($port+1))
+    fi
+    echo "Listener port: $port"
+  else
+    echo "Failed to get listener port."
+    return 1
+  fi
+}
+
+create_listener() {
+	echo "(7) Creating listener..."
+	if load_balancer_listener_arn=$(aws elbv2 create-listener --load-balancer-arn $LOAD_BALANCER_ARN --protocol HTTP --port $port --default-actions Type=forward,TargetGroupArn=$SAMPLE_TARGET_GROUP_ARN | $JQ ".Listeners[0].ListenerArn"); then
+		echo "Listener created - $load_balancer_listener_arn"
+	else
+		echo "Error creating listener."
+		return 1
+  fi
+}
+
+add_rules() {
+	echo "(8) Add rules..."
+	if [[ $(aws elbv2 create-rule --listener-arn $load_balancer_listener_arn --priority $1 --conditions Field=path-pattern,Values="$2" --actions Type=forward,TargetGroupArn=$target_group_arn | $JQ ".Rules[0].Actions[0].TargetGroupArn") == $target_group_arn ]]; then
+		echo "Rules created!"
+	else
+		echo "Error creating rule."
+		return 1
+  fi
+}
+
 deploy_users() {
   echo "Deploying users service..."
   echo "(1) Tagging and pushing images..."
@@ -94,6 +129,7 @@ deploy_users() {
   register_definition
   create_target_group "users" "3000" "/users/ping"
   get_target_group_arn "users"
+  add_rules "1" "/users*"
 }
 
 deploy_movies() {
@@ -117,6 +153,7 @@ deploy_movies() {
   register_definition
   create_target_group "movies" "3000" "/movies/ping"
   get_target_group_arn "movies"
+  add_rules "2" "/movies*"
 }
 
 deploy_web() {
@@ -136,6 +173,7 @@ deploy_web() {
   register_definition
   create_target_group "web" "9000" "/"
   get_target_group_arn "web"
+  add_rules "3" "/"
 }
 
 
@@ -143,6 +181,8 @@ deploy_web() {
 
 configure_aws_cli
 get_cluster
+get_listener_port
+create_listener
 deploy_users
 deploy_movies
 deploy_web
