@@ -45,7 +45,7 @@ get_cluster() {
 }
 
 register_definition() {
-  echo "(3) Registering task definition..."
+  echo "Registering task definition..."
   if revision=$(aws ecs register-task-definition --cli-input-json "$task_def" --family $family | $JQ '.taskDefinition.taskDefinitionArn'); then
     echo "Revision: $revision"
     echo "Task definition registered!"
@@ -56,7 +56,7 @@ register_definition() {
 }
 
 create_target_group() {
-  echo "(04) Creating target group..."
+  echo "Creating target group..."
   if [[ $(aws elbv2 create-target-group --name "$TARGET_GROUP-$1" --protocol HTTP --port $2 --vpc-id $VPC_ID --health-check-path $3 | $JQ ".TargetGroups[0].TargetGroupName") == "$TARGET_GROUP-$1" ]]; then
     echo "Target group created!"
   else
@@ -66,7 +66,7 @@ create_target_group() {
 }
 
 get_target_group_arn() {
-  echo "(5) Getting target group arn..."
+  echo "Getting target group arn..."
   if target_group_arn=$(aws elbv2 describe-target-groups --name "$TARGET_GROUP-$1" | $JQ ".TargetGroups[0].TargetGroupArn"); then
     echo "Target group arn: $target_group_arn"
   else
@@ -76,7 +76,7 @@ get_target_group_arn() {
 }
 
 get_listener_port() {
-  echo "(6) Getting listener port..."
+  echo "Getting listener port..."
   if port=$(aws elbv2 describe-listeners --load-balancer-arn $LOAD_BALANCER_ARN | $JQ ".Listeners | max_by(.Port) | .Port"); then
     if [[ $port == "80" ]]; then
       port=30000
@@ -91,8 +91,8 @@ get_listener_port() {
 }
 
 create_listener() {
-	echo "(7) Creating listener..."
-	if load_balancer_listener_arn=$(aws elbv2 create-listener --load-balancer-arn $LOAD_BALANCER_ARN --protocol HTTP --port $port --default-actions Type=forward,TargetGroupArn=$SAMPLE_TARGET_GROUP_ARN | $JQ ".Listeners[0].ListenerArn"); then
+	echo "Creating listener..."
+	if load_balancer_listener_arn=$(aws elbv2 create-listener --load-balancer-arn $LOAD_BALANCER_ARN --protocol HTTP --port $port --default-actions Type=forward,TargetGroupArn=$DEFAULT_TARGET_GROUP_ARN | $JQ ".Listeners[0].ListenerArn"); then
 		echo "Listener created - $load_balancer_listener_arn"
 	else
 		echo "Error creating listener."
@@ -101,7 +101,7 @@ create_listener() {
 }
 
 add_rules() {
-	echo "(8) Add rules..."
+	echo "Add rules..."
 	if [[ $(aws elbv2 create-rule --listener-arn $load_balancer_listener_arn --priority $1 --conditions Field=path-pattern,Values="$2" --actions Type=forward,TargetGroupArn=$target_group_arn | $JQ ".Rules[0].Actions[0].TargetGroupArn") == $target_group_arn ]]; then
 		echo "Rules created!"
 	else
@@ -112,14 +112,14 @@ add_rules() {
 
 deploy_users() {
   echo "Deploying users service..."
-  echo "(1) Tagging and pushing images..."
+  echo "Tagging and pushing images..."
   $(aws ecr get-login --region "${ECS_REGION}")
 	docker tag ${IMAGE_BASE}_users-db-review ${ECR_URI}/${NAMESPACE}/users-db-review:${TAG}
 	docker tag ${IMAGE_BASE}_users-service-review ${ECR_URI}/${NAMESPACE}/users-service-review:${TAG}
 	docker push ${ECR_URI}/${NAMESPACE}/users-db-review:${TAG}
   docker push ${ECR_URI}/${NAMESPACE}/users-service-review:${TAG}
   echo "Images tagged and pushed!"
-  echo "(2) Creating users task definition..."
+  echo "Creating users task definition..."
   family="sample-users-review-td"
   template="users-review_task.json"
   task_template=$(cat "ecs/tasks/$template")
@@ -134,7 +134,7 @@ deploy_users() {
 
 deploy_movies() {
   echo "Deploying movies service..."
-  echo "(1) Tagging and pushing images..."
+  echo "Tagging and pushing images..."
   $(aws ecr get-login --region "${ECS_REGION}")
 	docker tag ${IMAGE_BASE}_movies-db-review ${ECR_URI}/${NAMESPACE}/movies-db-review:${TAG}
 	docker tag ${IMAGE_BASE}_movies-service-review ${ECR_URI}/${NAMESPACE}/movies-service-review:${TAG}
@@ -143,7 +143,7 @@ deploy_movies() {
 	docker push ${ECR_URI}/${NAMESPACE}/movies-service-review:${TAG}
 	docker push ${ECR_URI}/${NAMESPACE}/swagger-review:${TAG}
   echo "Images tagged and pushed!"
-  echo "(2) Creating movies task definition..."
+  echo "Creating movies task definition..."
   family="sample-movies-review-td"
   template="movies-review_task.json"
   task_template=$(cat "ecs/tasks/$template")
@@ -158,12 +158,12 @@ deploy_movies() {
 
 deploy_web() {
   echo "Deploying web service..."
-  echo "(1) Tagging and pushing images..."
+  echo "Tagging and pushing images..."
   $(aws ecr get-login --region "${ECS_REGION}")
 	docker tag ${IMAGE_BASE}_web-service-review ${ECR_URI}/${NAMESPACE}/web-service-review:${TAG}
 	docker push ${ECR_URI}/${NAMESPACE}/web-service-review:${TAG}
   echo "Images tagged and pushed!"
-  echo "(2) Creating web task definition..."
+  echo "Creating web task definition..."
   family="sample-web-review-td"
   template="web-review_task.json"
   task_template=$(cat "ecs/tasks/$template")
