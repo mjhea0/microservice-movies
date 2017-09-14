@@ -9,7 +9,10 @@ const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_USERNAME = process.env.AWS_USERNAME;
 const AWS_CONFIG_REGION = 'us-west-2';
 const SHORT_GIT_HASH = process.env.CIRCLE_SHA1.substring(0, 7);
-const VPC='vpc-b1039dd7';
+const VPC_ID='vpc-b1039dd7';
+let usersTargetGroupARN;
+let moviesTargetGroupARN;
+let webTargetGroupARN;
 
 
 // config
@@ -44,7 +47,7 @@ function addTargetGroup(service, port, path) {
       Name: `${SHORT_GIT_HASH}-${service}`,
       Port: port,
       Protocol: "HTTP",
-      VpcId: VPC,
+      VpcId: VPC_ID,
       HealthCheckPath: path
     };
     elbv2.createTargetGroup(params, (err, data) => {
@@ -63,14 +66,17 @@ return ensureAuthenticated()
   return addTargetGroup('users', '3000', '/users/ping');
 })
 .then((res) => {
-  console.log(res);
+  usersTargetGroupARN = res.TargetGroups[0].TargetGroupArn;
+  console.log('Target Group Added!');
   return addTargetGroup('movies', '3000', '/movies/ping');
 })
 .then((res) => {
-  console.log(res);
+  moviesTargetGroupARN = res.TargetGroups[0].TargetGroupArn;
+  console.log('Target Group Added!');
   return addTargetGroup('web', '9000', '/');
 })
 .then((res) => {
-  console.log(res);
+  webTargetGroupARN = res.TargetGroups[0].TargetGroupArn;
+  console.log('Target Group Added!');
 })
 .catch((err) => { console.log(err); });
