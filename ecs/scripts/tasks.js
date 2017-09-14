@@ -14,8 +14,6 @@ const AWS_USERNAME = process.env.AWS_USERNAME;
 const AWS_CONFIG_REGION = 'us-west-2';
 const SHORT_GIT_HASH = process.env.CIRCLE_SHA1.substring(0, 7);
 
-const clusterName = 'microservicemovies-review';
-
 
 // config
 

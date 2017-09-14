@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-###################################
-### ECS Deployment Setup Script ###
-###################################
-
 
 # config
 
