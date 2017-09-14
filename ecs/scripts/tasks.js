@@ -26,13 +26,13 @@ AWS.config.region = AWS_CONFIG_REGION;
 // init aws services
 
 const ecs = new AWS.ECS();
+const iam = new AWS.IAM();
 
 
 // methods
 
 function ensureAuthenticated() {
   return new Promise((resolve, reject) => {
-    const iam = new AWS.IAM();
     const params = { UserName: AWS_USERNAME };
     iam.getUser(params, (err, data) => {
       if (err) { reject(err); }
@@ -41,28 +41,10 @@ function ensureAuthenticated() {
   });
 }
 
-function getTaskDefinitionRevision(taskDefinitionName) {
-  return new Promise((resolve, reject) => {
-    const params = { taskDefinition: taskDefinitionName };
-    ecs.describeTaskDefinition(params, function(err, data) {
-      if (err) {
-        if (err.message === 'Unable to describe task definition.') {
-          resolve(1);
-        }
-        reject(err.message);
-      } else {
-        const revision = data.taskDefinition.revision;
-        resolve(revision);
-      }
-    });
-  });
-}
-
 function registerTaskDef(task) {
   return new Promise((resolve, reject) => {
     const params = task;
     ecs.registerTaskDefinition(params, (err, data) => {
-      console.log(data);
       if (err) { reject(err); }
       resolve(data);
     });
@@ -70,13 +52,11 @@ function registerTaskDef(task) {
 }
 
 function registerUsersTD(taskDefinitionName) {
-  getTaskDefinitionRevision('microservicemovies-review-users-td')
-  .then((revision) => {
-    const task = createUsersTaskDefinition(AWS_ACCOUNT_ID, AWS_CONFIG_REGION, SHORT_GIT_HASH, taskDefinitionName, revision);
-    return registerTaskDef(task);
-  })
+  const task = createUsersTaskDefinition(AWS_ACCOUNT_ID, AWS_CONFIG_REGION, SHORT_GIT_HASH);
+  return registerTaskDef(task)
   .then((res) => {
-    console.log(res);
+    console.log('Task Registered!');
+    console.log(res.taskDefinition.taskDefinitionArn);
   })
   .catch((err) => {
     console.log(err);
@@ -84,13 +64,11 @@ function registerUsersTD(taskDefinitionName) {
 }
 
 function registerMoviesTD(taskDefinitionName) {
-  getTaskDefinitionRevision('microservicemovies-review-movies-td')
-  .then((revision) => {
-    const task = createMoviesTaskDefinition(AWS_ACCOUNT_ID, AWS_CONFIG_REGION, SHORT_GIT_HASH, taskDefinitionName, revision);
-    return registerTaskDef(task);
-  })
+  const task = createMoviesTaskDefinition(AWS_ACCOUNT_ID, AWS_CONFIG_REGION, SHORT_GIT_HASH);
+  return registerTaskDef(task)
   .then((res) => {
-    console.log(res);
+    console.log('Task Registered!');
+    console.log(res.taskDefinition.taskDefinitionArn);
   })
   .catch((err) => {
     console.log(err);
@@ -98,13 +76,11 @@ function registerMoviesTD(taskDefinitionName) {
 }
 
 function registerWebTD(taskDefinitionName) {
-  getTaskDefinitionRevision('microservicemovies-review-web-td')
-  .then((revision) => {
-    const task = createWebTaskDefinition(AWS_ACCOUNT_ID, AWS_CONFIG_REGION, SHORT_GIT_HASH, taskDefinitionName, revision);
-    return registerTaskDef(task);
-  })
+  const task = createWebTaskDefinition(AWS_ACCOUNT_ID, AWS_CONFIG_REGION, SHORT_GIT_HASH);
+  return registerTaskDef(task)
   .then((res) => {
-    console.log(res);
+    console.log('Task Registered!');
+    console.log(res.taskDefinition.taskDefinitionArn);
   })
   .catch((err) => {
     console.log(err);

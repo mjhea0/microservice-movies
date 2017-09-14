@@ -1,4 +1,4 @@
-function createMoviesTaskDefinition(accountID, region, tag, family, revision) {
+function createMoviesTaskDefinition(accountID, region, tag) {
   const taskDefinition = {
     containerDefinitions: [
       {

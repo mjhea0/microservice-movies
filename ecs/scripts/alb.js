@@ -31,13 +31,13 @@ AWS.config.region = AWS_CONFIG_REGION;
 // init aws services
 
 const elbv2 = new AWS.ELBv2();
+const iam = new AWS.IAM();
 
 
 // methods
 
 function ensureAuthenticated() {
   return new Promise((resolve, reject) => {
-    const iam = new AWS.IAM();
     const params = { UserName: AWS_USERNAME };
     iam.getUser(params, (err, data) => {
       if (err) { reject(err); }
@@ -94,12 +94,12 @@ function addListener(port) {
   });
 }
 
-function addRule(targetgroup, pattern, listener, priority) {
+function addRule(targetGroup, pattern, listener, priority) {
   return new Promise((resolve, reject) => {
     var params = {
       Actions: [
         {
-          TargetGroupArn: targetgroup,
+          TargetGroupArn: targetGroup,
           Type: 'forward'
         }
      ],

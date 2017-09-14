@@ -1,4 +1,4 @@
-function createWebTaskDefinition(accountID, region, tag, family, revision) {
+function createWebTaskDefinition(accountID, region, tag) {
   const taskDefinition = {
     containerDefinitions: [
       {

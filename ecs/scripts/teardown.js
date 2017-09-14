@@ -8,8 +8,8 @@ const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_USERNAME = process.env.AWS_USERNAME;
 const AWS_CONFIG_REGION = 'us-west-2';
-
-const CLUSTER_NAME = 'microservicemovies-review';
+const SHORT_GIT_HASH = process.env.CIRCLE_SHA1.substring(0, 7);
+const LOAD_BALANCER_ARN = 'arn:aws:elasticloadbalancing:us-west-2:046505967931:loadbalancer/app/microservicemovies-review/493be740ee6aea54';
 
 
 // config
@@ -22,8 +22,8 @@ AWS.config.region = AWS_CONFIG_REGION;
 
 // init aws services
 
-const ecs = new AWS.ECS();
 const iam = new AWS.IAM();
+const elbv2 = new AWS.ELBv2();
 
 
 // methods
@@ -38,19 +38,12 @@ function ensureAuthenticated() {
   });
 }
 
-function confirmRegion() {
+function getListeners() {
   return new Promise((resolve, reject) => {
-    if (AWS.config.region !== AWS_CONFIG_REGION) {
-      reject('Something went wrong!');
-    }
-    resolve(AWS_CONFIG_REGION);
-  });
-}
-
-function getCluster() {
-  return new Promise((resolve, reject) => {
-    const params = { clusters: [ CLUSTER_NAME ] };
-    ecs.describeClusters(params, (err, data) => {
+    var params = {
+      LoadBalancerArn: LOAD_BALANCER_ARN
+    };
+    elbv2.describeListeners(params, (err, data) => {
       if (err) { reject(err); }
       resolve(data);
     });
@@ -63,17 +56,9 @@ function getCluster() {
 return ensureAuthenticated()
 .then((data) => {
   console.log(`Welcome ${data.User.UserName}!`);
-  return confirmRegion();
+  return getListeners();
 })
-.then((region) => {
-  console.log(`AWS Region -> ${region}`);
-  return getCluster();
-})
-.then((cluster) => {
-  if (!cluster.clusters.length) {
-    console.log('Cluster does not exist!');
-    return;
-  }
-  console.log(`ECS Cluster -> ${cluster.clusters[0].clusterName}`);
+.then((res) => {
+  console.log(res);
 })
 .catch((err) => { console.log(err); });

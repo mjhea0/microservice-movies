@@ -1,4 +1,4 @@
-function createUsersTaskDefinition(accountID, region, tag, family, revision) {
+function createUsersTaskDefinition(accountID, region, tag) {
   const taskDefinition = {
     containerDefinitions: [
       {
