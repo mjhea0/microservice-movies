@@ -10,9 +10,14 @@ const AWS_USERNAME = process.env.AWS_USERNAME;
 const AWS_CONFIG_REGION = 'us-west-2';
 const SHORT_GIT_HASH = process.env.CIRCLE_SHA1.substring(0, 7);
 const VPC_ID='vpc-b1039dd7';
-let usersTargetGroupARN;
-let moviesTargetGroupARN;
-let webTargetGroupARN;
+const LOAD_BALANCER_ARN = 'arn:aws:elasticloadbalancing:us-west-2:046505967931:loadbalancer/app/microservicemovies-review/493be740ee6aea54';
+const DEFAULT_TARGET_GROUP_ARN = 'arn:aws:elasticloadbalancing:us-west-2:046505967931:targetgroup/review-default/8d3d2ac4ab98bb89';
+
+let USERS_TARGET_GROUP_ARN;
+let MOVIES_TARGET_GROUP_ARN;
+let WEB_TARGET_GROUP_ARN;
+let MAX_PORT;
+let LISTENER_ARN;
 
 
 // config
@@ -46,11 +51,68 @@ function addTargetGroup(service, port, path) {
     var params = {
       Name: `${SHORT_GIT_HASH}-${service}`,
       Port: port,
-      Protocol: "HTTP",
+      Protocol: 'HTTP',
       VpcId: VPC_ID,
       HealthCheckPath: path
     };
     elbv2.createTargetGroup(params, (err, data) => {
+      if (err) { reject(err); }
+      resolve(data);
+    });
+  });
+}
+
+function getListeners() {
+  return new Promise((resolve, reject) => {
+    var params = {
+      LoadBalancerArn: LOAD_BALANCER_ARN
+    };
+    elbv2.describeListeners(params, (err, data) => {
+      if (err) { reject(err); }
+      resolve(data);
+    });
+  });
+}
+
+function addListener(port) {
+  return new Promise((resolve, reject) => {
+    var params = {
+      DefaultActions: [
+        {
+          TargetGroupArn: DEFAULT_TARGET_GROUP_ARN,
+          Type: 'forward'
+        }
+      ],
+      LoadBalancerArn: LOAD_BALANCER_ARN,
+      Port: port,
+      Protocol: 'HTTP'
+    };
+    elbv2.createListener(params, (err, data) => {
+      if (err) { reject(err); }
+      resolve(data);
+    });
+  });
+}
+
+function addRule(targetgroup, pattern, listener, priority) {
+  return new Promise((resolve, reject) => {
+    var params = {
+      Actions: [
+        {
+          TargetGroupArn: targetgroup,
+          Type: 'forward'
+        }
+     ],
+     Conditions: [
+      {
+        Field: 'path-pattern',
+        Values: [pattern]
+      }
+     ],
+     ListenerArn: listener,
+     Priority: priority
+    };
+    elbv2.createRule(params, (err, data) => {
       if (err) { reject(err); }
       resolve(data);
     });
@@ -66,17 +128,45 @@ return ensureAuthenticated()
   return addTargetGroup('users', '3000', '/users/ping');
 })
 .then((res) => {
-  usersTargetGroupARN = res.TargetGroups[0].TargetGroupArn;
+  USERS_TARGET_GROUP_ARN = res.TargetGroups[0].TargetGroupArn;
   console.log('Target Group Added!');
   return addTargetGroup('movies', '3000', '/movies/ping');
 })
 .then((res) => {
-  moviesTargetGroupARN = res.TargetGroups[0].TargetGroupArn;
+  MOVIES_TARGET_GROUP_ARN = res.TargetGroups[0].TargetGroupArn;
   console.log('Target Group Added!');
   return addTargetGroup('web', '9000', '/');
 })
 .then((res) => {
-  webTargetGroupARN = res.TargetGroups[0].TargetGroupArn;
+  WEB_TARGET_GROUP_ARN = res.TargetGroups[0].TargetGroupArn;
   console.log('Target Group Added!');
+  return getListeners();
+})
+.then((res) => {
+  const max = res.Listeners.reduce((prev, current) => {
+    return (prev.Port > current.Port) ? prev : current;
+  });
+  if (parseInt(max.Port) === 80) {
+    MAX_PORT = 30000;
+  } else {
+    MAX_PORT = max.Port + 1;
+  }
+  return addListener(MAX_PORT);
+})
+.then((res) => {
+  LISTENER_ARN = res.Listeners[0].ListenerArn;
+  console.log(`Listener added on port ${res.Listeners[0].Port}!`);
+  return addRule(USERS_TARGET_GROUP_ARN, '/users*', LISTENER_ARN, 1);
+})
+.then((res) => {
+  console.log('Rule Added!');
+  return addRule(MOVIES_TARGET_GROUP_ARN, '/movies*', LISTENER_ARN, 2);
+})
+.then((res) => {
+  console.log('Rule Added!');
+  return addRule(WEB_TARGET_GROUP_ARN, '/', LISTENER_ARN, 3);
+})
+.then((res) => {
+  console.log('Rule Added!');
 })
 .catch((err) => { console.log(err); });

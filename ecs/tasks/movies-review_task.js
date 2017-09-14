@@ -73,7 +73,7 @@ function createMoviesTaskDefinition(accountID, region, tag, family, revision) {
         }
       },
       {
-        name: "swagger-review",
+        name: 'swagger-review',
         image: `${accountID}.dkr.ecr.${region}.amazonaws.com\/microservicemovies\/swagger-review:${tag}`,
         essential: true,
         memoryReservation: 300,
@@ -82,17 +82,17 @@ function createMoviesTaskDefinition(accountID, region, tag, family, revision) {
           {
             containerPort: 3001,
             hostPort: 0,
-            protocol: "tcp"
+            protocol: 'tcp'
           }
         ],
         environment: [
           {
-            name: "NODE_ENV",
-            value: "test"
+            name: 'NODE_ENV',
+            value: 'test'
           }
         ],
         logConfiguration: {
-          logDriver: "awslogs",
+          logDriver: 'awslogs',
           options: {
             'awslogs-group': 'microservicemovies',
             'awslogs-region': region

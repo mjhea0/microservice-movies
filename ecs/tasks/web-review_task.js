@@ -20,12 +20,12 @@ function createWebTaskDefinition(accountID, region, tag, family, revision) {
             value: 'test'
           },
           {
-            "name": "REACT_APP_USERS_SERVICE_URL",
-            "value": "tbd"
+            name: 'REACT_APP_USERS_SERVICE_URL',
+            value: 'tbd'
           },
           {
-            "name": "REACT_APP_MOVIES_SERVICE_URL",
-            "value": "tbd"
+            name: 'REACT_APP_MOVIES_SERVICE_URL',
+            value: 'tbd'
           }
         ],
         logConfiguration: {
