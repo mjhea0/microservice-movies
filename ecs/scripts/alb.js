@@ -164,7 +164,7 @@ return ensureAuthenticated()
 })
 .then((res) => {
   console.log('Rule Added!');
-  return addRule(WEB_TARGET_GROUP_ARN, '/', LISTENER_ARN, 3);
+  return addRule(WEB_TARGET_GROUP_ARN, '/*', LISTENER_ARN, 3);
 })
 .then((res) => {
   console.log('Rule Added!');
