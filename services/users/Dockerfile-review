@@ -1,5 +1,11 @@
 FROM node:latest
 
+# install environment dependencies
+RUN apt-get update -yqq \
+  && apt-get install -yqq --no-install-recommends \
+    netcat \
+  && apt-get -q clean
+
 # set working directory
 RUN mkdir /usr/src/app
 WORKDIR /usr/src
@@ -11,8 +17,10 @@ ENV PATH /usr/src/node_modules/.bin:$PATH
 ADD package.json /usr/src/package.json
 RUN npm install
 
+ADD ./entrypoint.sh /usr/src/entrypoint.sh
+
 # add app
 ADD . /usr/src/app
 
 # start app
-CMD ["npm", "start"]
+CMD ["./entrypoint.sh"]

@@ -25,11 +25,3 @@ Run the containers:
 ```sh
 $ docker-compose -f docker-compose-review.yml up -d
 ```
-
-#### Migrate and Seed
-
-With the apps up, run:
-
-```sh
-$ sh init_db-review.sh
-```
