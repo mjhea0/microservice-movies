@@ -17,4 +17,5 @@ ADD ./entrypoint.sh /usr/src/entrypoint.sh
 ADD . /usr/src/app
 
 # start app
+RUN chmod +x ./entrypoint.sh
 CMD ["./entrypoint.sh"]
