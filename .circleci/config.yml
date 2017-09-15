@@ -44,3 +44,4 @@ jobs:
           command: |
             npm install
             node ecs/scripts/setup.js
+            sh ecs/scripts/ecr.sh
