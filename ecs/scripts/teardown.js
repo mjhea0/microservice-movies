@@ -19,6 +19,7 @@ if (!ARGS[0] || !ARGS[1]) {
 }
 
 const SHORT_GIT_HASH = ARGS[1].substring(0, 7);
+const CLUSTER_NAME = 'microservicemovies-review';
 
 
 // config
@@ -33,6 +34,7 @@ AWS.config.region = AWS_CONFIG_REGION;
 
 const iam = new AWS.IAM();
 const elbv2 = new AWS.ELBv2();
+const ecs = new AWS.ECS();
 
 
 // methods
@@ -91,8 +93,6 @@ function removeTargetGroup(targetgroup) {
   });
 }
 
-const ecs = new AWS.ECS();
-const CLUSTER_NAME = 'microservicemovies-review';
 function updateServiceCount(serviceName) {
   return new Promise((resolve, reject) => {
     var params = {
@@ -119,6 +119,7 @@ function removeService(serviceName) {
     });
   });
 }
+
 
 // main
 

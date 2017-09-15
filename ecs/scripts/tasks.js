@@ -4,6 +4,8 @@ const createUsersTaskDefinition = require('../tasks/users-review_task').createUs
 const createMoviesTaskDefinition = require('../tasks/movies-review_task').createMoviesTaskDefinition;
 const createWebTaskDefinition = require('../tasks/web-review_task').createWebTaskDefinition;
 
+const port = require('./listener').getPort;
+
 
 // globals
 
@@ -13,6 +15,7 @@ const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_USERNAME = process.env.AWS_USERNAME;
 const AWS_CONFIG_REGION = 'us-west-2';
 const SHORT_GIT_HASH = process.env.CIRCLE_SHA1.substring(0, 7);
+const LOAD_BALANCER_DNS = 'http://microservicemovies-review-476947634.us-west-2.elb.amazonaws.com';
 
 
 // config
@@ -51,7 +54,7 @@ function registerTaskDef(task) {
   });
 }
 
-function registerUsersTD(taskDefinitionName) {
+function registerUsersTD() {
   const task = createUsersTaskDefinition(AWS_ACCOUNT_ID, AWS_CONFIG_REGION, SHORT_GIT_HASH);
   return registerTaskDef(task)
   .then((res) => {
@@ -63,7 +66,7 @@ function registerUsersTD(taskDefinitionName) {
   });
 }
 
-function registerMoviesTD(taskDefinitionName) {
+function registerMoviesTD() {
   const task = createMoviesTaskDefinition(AWS_ACCOUNT_ID, AWS_CONFIG_REGION, SHORT_GIT_HASH);
   return registerTaskDef(task)
   .then((res) => {
@@ -75,8 +78,8 @@ function registerMoviesTD(taskDefinitionName) {
   });
 }
 
-function registerWebTD(taskDefinitionName) {
-  const task = createWebTaskDefinition(AWS_ACCOUNT_ID, AWS_CONFIG_REGION, SHORT_GIT_HASH);
+function registerWebTD(usersURL, moviesURL) {
+  const task = createWebTaskDefinition(AWS_ACCOUNT_ID, AWS_CONFIG_REGION, SHORT_GIT_HASH, usersURL, moviesURL);
   return registerTaskDef(task)
   .then((res) => {
     console.log('Task Registered!');
@@ -93,8 +96,13 @@ function registerWebTD(taskDefinitionName) {
 return ensureAuthenticated()
 .then((data) => {
   console.log(`Welcome ${data.User.UserName}!`);
+  return port();
+})
+.then((port) => {
+  const usersURL = `${LOAD_BALANCER_DNS}:${port}/users`;
+  const moviesURL = `${LOAD_BALANCER_DNS}:${port}/movies`;
   registerUsersTD();
   registerMoviesTD();
-  registerWebTD();
+  registerWebTD(usersURL, moviesURL);
 })
 .catch((err) => { console.log(err); });

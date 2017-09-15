@@ -1,4 +1,4 @@
-function createWebTaskDefinition(accountID, region, tag) {
+function createWebTaskDefinition(accountID, region, tag, usersURL, moviesURL) {
   const taskDefinition = {
     containerDefinitions: [
       {
@@ -21,11 +21,11 @@ function createWebTaskDefinition(accountID, region, tag) {
           },
           {
             name: 'REACT_APP_USERS_SERVICE_URL',
-            value: 'tbd'
+            value: usersURL
           },
           {
             name: 'REACT_APP_MOVIES_SERVICE_URL',
-            value: 'tbd'
+            value: moviesURL
           }
         ],
         logConfiguration: {
