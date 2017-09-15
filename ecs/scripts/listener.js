@@ -37,7 +37,7 @@ function getPort() {
         return (prev.Port > current.Port) ? prev : current;
       });
       if (parseInt(max.Port) === 80) {
-        resolve(80);
+        resolve(3000);
       } else {
         const port = max.Port + 1;
         resolve(port);
