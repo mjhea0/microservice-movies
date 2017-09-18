@@ -1,0 +1,102 @@
+version: '2.1'
+
+services:
+
+  users-db-review:
+    container_name: users-db-review
+    build: ./services/users/src/db
+    ports:
+      - '5433:5432' # expose ports - HOST:CONTAINER
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: exit 0
+
+  movies-db-review:
+    container_name: movies-db-review
+    build: ./services/movies/src/db
+    ports:
+      - '5434:5432' # expose ports - HOST:CONTAINER
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: exit 0
+
+  users-service-review:
+    container_name: users-service-review
+    build:
+      context: ./services/users/
+      dockerfile: Dockerfile-review
+    ports:
+      - '3000:3000' # expose ports - HOST:CONTAINER
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@users-db-review:5432/users_dev
+      - DATABASE_TEST_URL=postgres://postgres:postgres@users-db-review:5432/users_test
+      - NODE_ENV=${NODE_ENV}
+      - TOKEN_SECRET=changeme
+    depends_on:
+      users-db-review:
+        condition: service_healthy
+    links:
+      - users-db-review
+
+  movies-service-review:
+    container_name: movies-service-review
+    build:
+      context: ./services/movies/
+      dockerfile: Dockerfile-review
+    ports:
+      - '3001:3000' # expose ports - HOST:CONTAINER
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@movies-db-review:5432/movies_dev
+      - DATABASE_TEST_URL=postgres://postgres:postgres@movies-db-review:5432/movies_test
+      - NODE_ENV=${NODE_ENV}
+      - TOKEN_SECRET=changeme
+    depends_on:
+      movies-db-review:
+        condition: service_healthy
+      users-service-review:
+        condition: service_started
+    links:
+      - movies-db-review
+      - users-service-review
+
+  web-service-review:
+    container_name: web-service-review
+    build:
+      context: ./services/web/
+      dockerfile: Dockerfile-review
+    ports:
+      - '3007:9000' # expose ports - HOST:CONTAINER
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - REACT_APP_USERS_SERVICE_URL=${REACT_APP_USERS_SERVICE_URL}
+      - REACT_APP_MOVIES_SERVICE_URL=h${REACT_APP_MOVIES_SERVICE_URL}
+    depends_on:
+      users-service-review:
+        condition: service_started
+      movies-service-review:
+        condition: service_started
+    links:
+      - users-service-review
+      - movies-service-review
+
+  swagger-review:
+    container_name: swagger-review
+    build:
+      context: ./services/movies/swagger/
+      dockerfile: Dockerfile-review
+    ports:
+      - '3003:3001' # expose ports - HOST:CONTAINER
+    environment:
+      - NODE_ENV=${NODE_ENV}
+    depends_on:
+      users-service-review:
+        condition: service_started
+      movies-service-review:
+        condition: service_started
+    links:
+      - users-service-review
+      - movies-service-review

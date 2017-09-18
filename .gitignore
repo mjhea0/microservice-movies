@@ -12,3 +12,4 @@ build
 .env
 npm-debug.log
 _ignore
+env.sh
