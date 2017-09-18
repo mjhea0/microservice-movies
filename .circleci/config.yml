@@ -1,0 +1,50 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: docker:17.03.2-ce-git
+    working_directory: ~/microservice-movies
+    environment:
+      - NODE_ENV: test
+      - REACT_APP_USERS_SERVICE_URL: http://localhost:3000
+      - REACT_APP_MOVIES_SERVICE_URL: http://localhost:3001
+    parallelism: 1
+    steps:
+      - checkout
+      - setup_remote_docker:
+          reusable: true
+          exclusive: false
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --no-cache \
+              py-pip=9.0.0-r1 \
+              bash \
+              jq \
+              curl \
+              nodejs
+            pip install \
+              docker-compose==1.12.0 \
+              awscli==1.11.76
+      - run:
+          name: Build Docker images
+          command: docker-compose -f docker-compose-review.yml build
+      - run:
+          name: Spin up Docker containers
+          command: docker-compose -f docker-compose-review.yml up -d
+      - run:
+          name: Test the user service
+          command: docker-compose -f docker-compose-review.yml run users-service-review npm test
+      - run:
+          name: Test the movies service
+          command: docker-compose -f docker-compose-review.yml run movies-service-review npm test
+      - run:
+          name: Deploy
+          command: |
+            npm install
+            node ecs/scripts/setup.js
+            sh ecs/scripts/ecr.sh
+            node ecs/scripts/tasks.js
+            node ecs/scripts/alb.js
+            node ecs/scripts/services.js
